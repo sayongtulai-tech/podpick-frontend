@@ -1,0 +1,223 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: 100vh;
+  background-color: #0f0f1a;
+  color: #f8fafc;
+  font-family: "Noto Sans KR", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.45s ease-out both;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.animate-toast-in {
+  animation: toastSlideIn 0.25s ease-out both;
+}
+
+@keyframes equalize {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.eq-bar {
+  animation: equalize 0.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes waveformPulse {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.waveform {
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  height: 30px;
+}
+
+.waveform.player-bar-waveform {
+  height: 28px;
+  min-width: 72px;
+}
+
+.waveform-compact {
+  height: 18px;
+  gap: 2px;
+  min-width: 48px;
+}
+
+.waveform-compact .waveform-bar {
+  width: 3px;
+}
+
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+.waveform-bar {
+  width: 4px;
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #a855f7 0%, #ec4899 100%);
+  transform-origin: bottom;
+  animation: waveformPulse 0.9s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+/* 하단 플레이어: 보라→핑크 그라데이션 막대 */
+.player-waveform .waveform-bar {
+  background: linear-gradient(180deg, #c084fc 0%, #a855f7 40%, #ec4899 100%);
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.35);
+}
+
+.waveform.running .waveform-bar {
+  animation-play-state: running;
+}
+
+.waveform.paused .waveform-bar {
+  animation-play-state: paused;
+  transform: scaleY(0.22);
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111225;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6d28d9, #ec4899);
+  border-radius: 9999px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  border-radius: 9999px;
+  background: #ec4899;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+}
+
+@keyframes introFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes introDot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+.intro-fade {
+  animation: introFadeOut 0.45s ease-out 1.05s both;
+}
+
+.intro-loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #c4b5fd 0%, #f9a8d4 100%);
+  animation: introDot 0.8s ease-in-out infinite;
+}
+
+.intro-fade-up {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeInUp 0.55s ease-out forwards;
+}
+
+.intro-chip {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.intro-chip:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(168, 85, 247, 0.25);
+}
+
+.intro-start-btn {
+  transition: box-shadow 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+.intro-start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.45);
+  filter: brightness(1.05);
+}
