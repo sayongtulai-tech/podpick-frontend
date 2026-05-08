@@ -375,9 +375,9 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* 모바일: 진행바 + 탭바 + 미니 플레이어 (768px 미만) */}
       <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="border-t border-white/10 bg-[#101022]/98 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+        <div className="border-t border-white/15 bg-gradient-to-t from-[#0e0e1a]/96 via-[#101022]/94 to-[#14142a]/92 pb-[max(0.45rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(6,8,20,0.55),0_-2px_12px_rgba(168,85,247,0.16)] backdrop-blur-xl">
           <nav
-            className="grid grid-cols-4 border-b border-white/10 bg-[#101022]/95"
+            className="grid grid-cols-4 border-b border-white/10 bg-[#101022]/60"
             aria-label="주요 메뉴"
           >
             <Link
@@ -423,8 +423,11 @@ function Shell({ children }: { children: React.ReactNode }) {
               <span>보관함</span>
             </Link>
           </nav>
-          <div className="flex items-center gap-3 px-3 py-2">
-            <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+          <div className="flex items-center gap-3 px-3 py-1.5">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-500/35 to-pink-500/35 blur-sm" aria-hidden />
+              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+            </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
                 {selectedPlaylist?.title ?? "선택된 곡 없음"}
@@ -439,7 +442,9 @@ function Shell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={togglePlay}
-              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-lg font-semibold text-white"
+              className={`btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-violet-200/40 bg-gradient-to-br from-violet-400/85 to-pink-500/85 text-lg font-semibold text-white shadow-[0_8px_22px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.96] ${
+                isPlaying ? "animate-pulse" : ""
+              }`}
               aria-label={isPlaying ? "일시정지" : "재생"}
             >
               {isPlaying ? "⏸" : "▶"}
@@ -447,20 +452,25 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* mini player 아래쪽 진행바 */}
-          <div className="relative h-1 w-full bg-white/10">
-            <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-500 to-pink-500 transition-[width] duration-150"
-              style={{ width: `${progressPct}%` }}
-            />
+          <div className="px-3 pb-1">
+            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)]">
+              <div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.45)] transition-[width] duration-200"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* 태블릿·데스크톱 플레이어 */}
-      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/10 bg-[#101022]/95 px-4 py-3 backdrop-blur-md md:block">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/15 bg-gradient-to-t from-[#0e0e1a]/96 via-[#101022]/94 to-[#15152c]/90 px-4 py-2.5 shadow-[0_-20px_48px_rgba(5,7,18,0.6),0_-2px_12px_rgba(168,85,247,0.16)] backdrop-blur-xl md:block">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5">
           <div className="flex min-w-0 items-center gap-3">
-            <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-500/30 to-pink-500/30 blur-sm" aria-hidden />
+              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+            </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
                 {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
@@ -468,7 +478,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
                 {isPlaying ? (
-                  <div className="waveform waveform-compact player-waveform waveform running flex shrink-0" aria-hidden>
+                  <div className="waveform waveform-compact player-waveform waveform running flex shrink-0 opacity-95 drop-shadow-[0_0_6px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out" aria-hidden>
                     {Array.from({ length: 8 }).map((_, i) => (
                       <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
                     ))}
@@ -478,12 +488,12 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex w-[min(56vw,560px)] min-w-[300px] flex-col items-center gap-2">
+          <div className="flex w-[min(54vw,560px)] min-w-[300px] flex-col items-center gap-1.5">
             <div className="flex items-center gap-2 lg:gap-3">
               <button
                 type="button"
                 onClick={playPrevious}
-                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
+                className="btn-press flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100 shadow-[0_5px_16px_rgba(2,6,23,0.35)] transition-all duration-200 hover:border-violet-300/35 hover:bg-white/14 active:scale-[0.96]"
                 aria-label="이전 곡"
               >
                 ⏮
@@ -491,7 +501,9 @@ function Shell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={togglePlay}
-                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold"
+                className={`btn-press flex h-11 w-11 items-center justify-center rounded-full border border-violet-200/40 bg-gradient-to-br from-violet-400/90 to-pink-500/90 text-sm font-semibold text-white shadow-[0_10px_26px_rgba(168,85,247,0.5)] transition-all duration-300 ease-out hover:scale-[1.03] hover:brightness-110 active:scale-[0.95] ${
+                  isPlaying ? "animate-pulse" : ""
+                }`}
                 aria-label={isPlaying ? "일시정지" : "재생"}
               >
                 {isPlaying ? "⏸" : "▶"}
@@ -499,27 +511,29 @@ function Shell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={playNext}
-                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
+                className="btn-press flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100 shadow-[0_5px_16px_rgba(2,6,23,0.35)] transition-all duration-200 hover:border-violet-300/35 hover:bg-white/14 active:scale-[0.96]"
                 aria-label="다음 곡"
               >
                 ⏭
               </button>
             </div>
 
-            <div className="w-full max-w-[520px]">
-              <div className="mb-1 flex items-center justify-between text-[11px] tabular-nums text-slate-400">
+            <div className="w-full max-w-[500px]">
+              <div className="mb-1.5 flex items-center justify-between px-0.5 text-[11px] tabular-nums text-slate-400">
                 <span>{formatTime(currentTimeSec)}</span>
                 <span>{formatTime(durationSec)}</span>
               </div>
-              <input
-                type="range"
-                min={0}
-                max={Math.max(1, Math.floor(durationSec))}
-                value={Math.min(currentTimeSec, durationSec || 1)}
-                onChange={(e) => seekTo(Number(e.target.value))}
-                onInput={(e) => seekTo(Number((e.target as HTMLInputElement).value))}
-                className="min-h-[40px] w-full cursor-pointer py-1"
-              />
+              <div className="rounded-full border border-white/10 bg-white/[0.04] px-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+                <input
+                  type="range"
+                  min={0}
+                  max={Math.max(1, Math.floor(durationSec))}
+                  value={Math.min(currentTimeSec, durationSec || 1)}
+                  onChange={(e) => seekTo(Number(e.target.value))}
+                  onInput={(e) => seekTo(Number((e.target as HTMLInputElement).value))}
+                  className="min-h-[34px] w-full cursor-pointer py-1 accent-violet-400"
+                />
+              </div>
             </div>
           </div>
 
@@ -527,7 +541,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={toggleMute}
-              className="btn-press flex h-11 w-11 items-center justify-center rounded-lg border border-white/15 text-base"
+              className="btn-press flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-white/[0.04] text-base text-slate-100 transition-all duration-200 hover:border-violet-300/35 hover:bg-white/[0.09] active:scale-[0.96]"
               aria-label={isMuted ? "음소거 해제" : "음소거"}
             >
               {isMuted ? "🔇" : "🔊"}
@@ -539,7 +553,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               value={isMuted ? 0 : volume}
               onChange={(e) => setVolumeLevel(Number(e.target.value))}
               onInput={(e) => setVolumeLevel(Number((e.target as HTMLInputElement).value))}
-              className="h-2 w-24 min-h-[44px] cursor-pointer py-2"
+              className="h-2 w-24 min-h-[40px] cursor-pointer py-1 accent-violet-400"
             />
           </div>
         </div>

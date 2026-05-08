@@ -80,13 +80,14 @@ export const EMOTION_FILTER_ACTIVE: Record<string, string> = {
   수면: "border-indigo-950/60 bg-indigo-950/40 text-indigo-100",
 };
 
-const FILTER_IDLE = "border-white/15 bg-white/5 text-slate-300 hover:bg-white/10";
+const FILTER_IDLE =
+  "border-white/15 bg-white/5 text-slate-300 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10";
 
 export function emotionFilterChipClass(emotion: string, selected: boolean): string {
-  const base = "rounded-full border px-3 py-1 text-xs font-medium transition";
+  const base = "rounded-full border px-3 py-1 text-xs font-medium";
   if (!selected) return `${base} ${FILTER_IDLE}`;
   const active = EMOTION_FILTER_ACTIVE[emotion] ?? EMOTION_FILTER_ACTIVE["전체"];
-  return `${base} ${active}`;
+  return `${base} ${active} shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_6px_18px_rgba(168,85,247,0.22)] ring-1 ring-white/15 transition-all duration-300 ease-out`;
 }
 
 /** 탐색·카드 배지용 작은 점 색 (Tailwind bg-*) */
