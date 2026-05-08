@@ -1,51 +1,37 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_PLAYLIST_URL =
-  process.env.BACKEND_PLAYLIST_URL ?? "http://127.0.0.1:8080/api/playlists";
-
-function buildDeleteUrl(id: string) {
-  const normalized = BACKEND_PLAYLIST_URL.endsWith("/")
-    ? BACKEND_PLAYLIST_URL.slice(0, -1)
-    : BACKEND_PLAYLIST_URL;
-  return `${normalized}/${id}`;
-}
-
-async function parseErrorMessage(response: Response, fallback: string) {
-  const contentType = response.headers.get("content-type") ?? "";
-  try {
-    if (contentType.includes("application/json")) {
-      const data = (await response.json()) as { message?: string; error?: string };
-      return data.message ?? data.error ?? fallback;
-    }
-    const text = await response.text();
-    return text || fallback;
-  } catch {
-    return fallback;
-  }
-}
+import {
+  backendUnavailable,
+  buildBackendUrl,
+  callBackend,
+  mapBackendError,
+  requireAuthenticatedUser,
+} from "../_shared";
 
 export async function DELETE(
   _request: Request,
   { params }: { params: { id: string } },
 ) {
-  const targetUrl = buildDeleteUrl(params.id);
+  const auth = await requireAuthenticatedUser();
+  if (!auth.ok) return auth.response;
+
   try {
-    const response = await fetch(targetUrl, {
+    const response = await callBackend({
+      user: auth.user,
+      url: buildBackendUrl(params.id),
       method: "DELETE",
-      cache: "no-store",
     });
 
     if (!response.ok) {
-      const message = await parseErrorMessage(response, "Failed to delete playlist.");
-      return NextResponse.json({ message }, { status: response.status });
+      return mapBackendError(
+        response,
+        "BACKEND_DELETE_FAILED",
+        "Failed to delete playlist.",
+      );
     }
 
     return new NextResponse(null, { status: 204 });
   } catch {
-    return NextResponse.json(
-      { message: "Cannot delete playlist now. Check backend status." },
-      { status: 503 },
-    );
+    return backendUnavailable("플레이리스트를 삭제할 수 없습니다. 잠시 후 다시 시도해 주세요.");
   }
 }
 
@@ -53,27 +39,29 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } },
 ) {
-  const targetUrl = buildDeleteUrl(params.id);
+  const auth = await requireAuthenticatedUser();
+  if (!auth.ok) return auth.response;
+
   try {
     const body = await request.json();
-    const response = await fetch(targetUrl, {
+    const response = await callBackend({
+      user: auth.user,
+      url: buildBackendUrl(params.id),
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      cache: "no-store",
+      body,
     });
 
     if (!response.ok) {
-      const message = await parseErrorMessage(response, "Failed to update playlist.");
-      return NextResponse.json({ message }, { status: response.status });
+      return mapBackendError(
+        response,
+        "BACKEND_UPDATE_FAILED",
+        "Failed to update playlist.",
+      );
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch {
-    return NextResponse.json(
-      { message: "Cannot update playlist now. Check backend status." },
-      { status: 503 },
-    );
+    return backendUnavailable("플레이리스트를 수정할 수 없습니다. 잠시 후 다시 시도해 주세요.");
   }
 }

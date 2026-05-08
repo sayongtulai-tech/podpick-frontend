@@ -1,7 +1,6 @@
 "use client";
 
-import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { usePlayer } from "@/components/player/PlayerProvider";
 import { Playlist } from "@/types/playlist";
 import { useSession } from "next-auth/react";
@@ -14,202 +13,54 @@ import {
   type EmotionFilter,
   type EmotionOnly,
 } from "@/lib/emotions";
-
-const SORT_OPTIONS = ["최신순", "오래된순", "제목순", "좋아요순", "저장순"] as const;
+import { SORT_OPTIONS, usePlaylistViewData } from "@/app/home/usePlaylistViewData";
+import { usePlaylistCrud } from "@/app/home/usePlaylistCrud";
 
 function HomePageContent() {
   const { data: session } = useSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { playlists, loading, error, playPlaylist, refreshPlaylists } = usePlayer();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [title, setTitle] = useState("");
-  const [emotion, setEmotion] = useState<EmotionOnly>("새벽감성");
-  const [musicUrl, setMusicUrl] = useState("");
-  const [keyword, setKeyword] = useState("");
-  const [sortOption, setSortOption] = useState<(typeof SORT_OPTIONS)[number]>("최신순");
-  const [submitting, setSubmitting] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editEmotion, setEditEmotion] = useState<EmotionOnly>("새벽감성");
-  const [editMusicUrl, setEditMusicUrl] = useState("");
-  const [savingId, setSavingId] = useState<number | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 1800);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
-
-  /** URL이 단일 소스 — 로컬 상태와 불일치 방지 */
-  const emotionFilter = useMemo((): EmotionFilter => {
-    const raw = searchParams.get("emotion");
-    if (!raw) return "전체";
-    return (EMOTIONS as readonly string[]).includes(raw) ? (raw as EmotionFilter) : "전체";
-  }, [searchParams]);
-
-  function applyEmotionFilter(tab: EmotionFilter) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (tab === "전체") {
-      params.delete("emotion");
-    } else {
-      params.set("emotion", tab);
-    }
-    const qs = params.toString();
-    router.push(qs ? `/?${qs}` : "/", { scroll: false });
-  }
-
-  const topLiked = useMemo(
-    () => [...playlists].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0)).slice(0, 6),
-    [playlists]
-  );
-
-  const filteredPlaylists = useMemo(() => {
-    const q = keyword.trim().toLowerCase();
-    const filtered = playlists.filter((item) => {
-      const byEmotion = emotionFilter === "전체" || item.emotion === emotionFilter;
-      const byKeyword =
-        q.length === 0 ||
-        item.title.toLowerCase().includes(q) ||
-        item.emotion.toLowerCase().includes(q);
-      return byEmotion && byKeyword;
-    });
-
-    const sorted = [...filtered];
-    if (sortOption === "최신순") sorted.sort((a, b) => b.id - a.id);
-    if (sortOption === "오래된순") sorted.sort((a, b) => a.id - b.id);
-    if (sortOption === "제목순") sorted.sort((a, b) => a.title.localeCompare(b.title, "ko"));
-    if (sortOption === "좋아요순") sorted.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
-    if (sortOption === "저장순") sorted.sort((a, b) => (b.savedCount ?? 0) - (a.savedCount ?? 0));
-    return sorted;
-  }, [playlists, keyword, emotionFilter, sortOption]);
-
-  function requireSession(): boolean {
-    if (!session) {
-      setToast("로그인이 필요한 기능이에요 😊");
-      return false;
-    }
-    return true;
-  }
-
-  async function handleCreatePlaylist(event: FormEvent) {
-    event.preventDefault();
-    if (!requireSession()) return;
-    if (!title.trim()) {
-      setCreateError("플레이리스트 제목을 입력해 주세요.");
-      return;
-    }
-
-    setCreateError(null);
-    setSubmitting(true);
-    try {
-      const payload = {
-        title: title.trim(),
-        emotion,
-        musicUrl: musicUrl.trim(),
-      };
-      const response = await fetch("/api/playlists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        const errorData = (await response.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(errorData?.message ?? "플레이리스트를 추가하지 못했습니다.");
-      }
-
-      setTitle("");
-      setEmotion("새벽감성");
-      setMusicUrl("");
-      setShowCreateForm(false);
-      await refreshPlaylists();
-    } catch (e) {
-      setCreateError(e instanceof Error ? e.message : "오류가 발생했습니다.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleLike(id: number) {
-    if (!requireSession()) return;
-    await fetch(`/api/playlists/${id}/like`, { method: "PATCH" });
-    await refreshPlaylists();
-  }
-
-  async function handleSaveCount(id: number) {
-    if (!requireSession()) return;
-    await fetch(`/api/playlists/${id}/save`, { method: "PATCH" });
-    await refreshPlaylists();
-  }
-
-  function startEdit(item: Playlist) {
-    if (!requireSession()) return;
-    setEditingId(item.id);
-    setEditTitle(item.title);
-    const em = isKnownEmotion(item.emotion) ? item.emotion : "새벽감성";
-    setEditEmotion(em);
-    setEditMusicUrl(item.musicUrl ?? "");
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setEditTitle("");
-    setEditMusicUrl("");
-  }
-
-  async function saveEdit() {
-    if (editingId == null || !requireSession()) return;
-    if (!editTitle.trim()) {
-      setToast("제목을 입력해 주세요.");
-      return;
-    }
-    setSavingId(editingId);
-    try {
-      const response = await fetch(`/api/playlists/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: editTitle.trim(),
-          emotion: editEmotion,
-          musicUrl: editMusicUrl.trim(),
-        }),
-      });
-      if (!response.ok) {
-        const err = (await response.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(err?.message ?? "수정에 실패했습니다.");
-      }
-      cancelEdit();
-      await refreshPlaylists();
-    } catch (e) {
-      setToast(e instanceof Error ? e.message : "수정 오류");
-    } finally {
-      setSavingId(null);
-    }
-  }
-
-  async function confirmDelete() {
-    if (deleteTargetId == null || !requireSession()) return;
-    setDeleting(true);
-    try {
-      const response = await fetch(`/api/playlists/${deleteTargetId}`, { method: "DELETE" });
-      if (!response.ok && response.status !== 204) {
-        const err = (await response.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(err?.message ?? "삭제에 실패했습니다.");
-      }
-      if (editingId === deleteTargetId) cancelEdit();
-      setDeleteTargetId(null);
-      await refreshPlaylists();
-    } catch (e) {
-      setToast(e instanceof Error ? e.message : "삭제 오류");
-    } finally {
-      setDeleting(false);
-    }
-  }
+  const {
+    keyword,
+    setKeyword,
+    sortOption,
+    setSortOption,
+    emotionFilter,
+    applyEmotionFilter,
+    topLiked,
+    filteredPlaylists,
+  } = usePlaylistViewData(playlists);
+  const {
+    showCreateForm,
+    toggleCreateForm,
+    title,
+    setTitle,
+    emotion,
+    setEmotion,
+    musicUrl,
+    setMusicUrl,
+    submitting,
+    createError,
+    toast,
+    editingId,
+    editTitle,
+    setEditTitle,
+    editEmotion,
+    setEditEmotion,
+    editMusicUrl,
+    setEditMusicUrl,
+    savingId,
+    deleteTargetId,
+    setDeleteTargetId,
+    deleting,
+    handleCreatePlaylist,
+    handleLike,
+    handleSaveCount,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    confirmDelete,
+    requireSession,
+  } = usePlaylistCrud({ session, refreshPlaylists });
 
   return (
     <div className="space-y-5">
@@ -260,13 +111,7 @@ function HomePageContent() {
           <h2 className="text-lg font-bold text-white">플레이리스트 관리</h2>
           <button
             type="button"
-            onClick={() => {
-              if (!session) {
-                setToast("로그인이 필요한 기능이에요 😊");
-                return;
-              }
-              setShowCreateForm((prev) => !prev);
-            }}
+            onClick={toggleCreateForm}
             className="btn-press min-h-[44px] rounded-lg bg-gradient-to-r from-violet-500 to-pink-500 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 md:min-h-0 md:py-2"
             disabled={!session}
           >

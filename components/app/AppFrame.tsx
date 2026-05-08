@@ -375,13 +375,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* 모바일: 진행바 + 탭바 + 미니 플레이어 (768px 미만) */}
       <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="border-t border-white/10 bg-[#101022]/98 shadow-[0_-8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
-          <div className="relative h-1 w-full bg-white/10">
-            <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-500 to-pink-500 transition-[width] duration-150"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
+        <div className="border-t border-white/10 bg-[#101022]/98 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
           <nav
             className="grid grid-cols-4 border-b border-white/10 bg-[#101022]/95"
             aria-label="주요 메뉴"
@@ -429,13 +423,18 @@ function Shell({ children }: { children: React.ReactNode }) {
               <span>보관함</span>
             </Link>
           </nav>
-          <div className="flex items-center gap-3 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <div className="flex items-center gap-3 px-3 py-2">
             <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
                 {selectedPlaylist?.title ?? "선택된 곡 없음"}
               </p>
               <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
+              {durationSec > 0 ? (
+                <p className="mt-0.5 truncate text-[10px] tabular-nums text-slate-500">
+                  {formatTime(currentTimeSec)} / {formatTime(durationSec)}
+                </p>
+              ) : null}
             </div>
             <button
               type="button"
@@ -446,56 +445,90 @@ function Shell({ children }: { children: React.ReactNode }) {
               {isPlaying ? "⏸" : "▶"}
             </button>
           </div>
+
+          {/* mini player 아래쪽 진행바 */}
+          <div className="relative h-1 w-full bg-white/10">
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-500 to-pink-500 transition-[width] duration-150"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
         </div>
       </div>
 
       {/* 태블릿·데스크톱 플레이어 */}
       <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/10 bg-[#101022]/95 px-4 py-3 backdrop-blur-md md:block">
-        <div className="mx-auto grid max-w-[1600px] items-center gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,1fr)_auto]">
-          <div className="flex min-w-0 items-center gap-3">
-            <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-100">
-                {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
-              </p>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
-                {isPlaying ? (
-                  <div className="waveform waveform-compact player-waveform waveform running flex shrink-0" aria-hidden>
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
-                    ))}
-                  </div>
-                ) : null}
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-3">
+          <div className="flex min-w-0 items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-100">
+                  {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
+                  {isPlaying ? (
+                    <div className="waveform waveform-compact player-waveform waveform running flex shrink-0" aria-hidden>
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+              <button
+                type="button"
+                onClick={playPrevious}
+                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
+                aria-label="이전 곡"
+              >
+                ⏮
+              </button>
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold"
+                aria-label={isPlaying ? "일시정지" : "재생"}
+              >
+                {isPlaying ? "⏸" : "▶"}
+              </button>
+              <button
+                type="button"
+                onClick={playNext}
+                className="btn-press flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
+                aria-label="다음 곡"
+              >
+                ⏭
+              </button>
+              <button
+                type="button"
+                onClick={toggleMute}
+                className="btn-press ml-1 flex h-11 w-11 items-center justify-center rounded-lg border border-white/15 text-base"
+                aria-label={isMuted ? "음소거 해제" : "음소거"}
+              >
+                {isMuted ? "🔇" : "🔊"}
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={isMuted ? 0 : volume}
+                onChange={(e) => setVolumeLevel(Number(e.target.value))}
+                onInput={(e) => setVolumeLevel(Number((e.target as HTMLInputElement).value))}
+                className="h-2 w-24 min-h-[44px] cursor-pointer py-2"
+              />
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-wrap items-center gap-2 lg:gap-3">
-            <button
-              type="button"
-              onClick={playPrevious}
-              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
-              aria-label="이전 곡"
-            >
-              ⏮
-            </button>
-            <button
-              type="button"
-              onClick={togglePlay}
-              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold"
-              aria-label={isPlaying ? "일시정지" : "재생"}
-            >
-              {isPlaying ? "⏸" : "▶"}
-            </button>
-            <button
-              type="button"
-              onClick={playNext}
-              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-slate-100"
-              aria-label="다음 곡"
-            >
-              ⏭
-            </button>
+          <div className="border-t border-white/10 pt-2">
+            <div className="mb-1 flex items-center justify-between text-[11px] tabular-nums text-slate-400">
+              <span>{formatTime(currentTimeSec)}</span>
+              <span>{formatTime(durationSec)}</span>
+            </div>
             <input
               type="range"
               min={0}
@@ -503,30 +536,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               value={Math.min(currentTimeSec, durationSec || 1)}
               onChange={(e) => seekTo(Number(e.target.value))}
               onInput={(e) => seekTo(Number((e.target as HTMLInputElement).value))}
-              className="min-h-[44px] min-w-0 flex-1 cursor-pointer py-2"
-            />
-            <span className="shrink-0 text-xs tabular-nums text-slate-300">
-              {formatTime(currentTimeSec)} / {formatTime(durationSec)}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-start gap-3 md:justify-end">
-            <button
-              type="button"
-              onClick={toggleMute}
-              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/15 text-base"
-              aria-label={isMuted ? "음소거 해제" : "음소거"}
-            >
-              {isMuted ? "🔇" : "🔊"}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={isMuted ? 0 : volume}
-              onChange={(e) => setVolumeLevel(Number(e.target.value))}
-              onInput={(e) => setVolumeLevel(Number((e.target as HTMLInputElement).value))}
-              className="h-2 w-28 min-h-[44px] cursor-pointer py-2"
+              className="min-h-[44px] w-full cursor-pointer py-2"
             />
           </div>
         </div>

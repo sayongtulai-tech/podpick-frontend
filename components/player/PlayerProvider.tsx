@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Playlist } from "@/types/playlist";
 import { getYouTubeVideoId } from "@/lib/youtube";
+import { usePlaylistData } from "@/components/player/usePlaylistData";
 
 type PlayerContextType = {
   playlists: Playlist[];
@@ -35,30 +36,15 @@ declare global {
 
 type Props = { children: React.ReactNode };
 
-const mockPlaylists: Playlist[] = [
-  {
-    id: 1,
-    title: "새벽에 듣는 재즈",
-    emotion: "새벽감성",
-    musicUrl: "",
-    likeCount: 5,
-    savedCount: 3,
-  },
-  {
-    id: 2,
-    title: "기분 좋은 하루",
-    emotion: "행복",
-    musicUrl: "",
-    likeCount: 8,
-    savedCount: 6,
-  },
-];
-
 export default function PlayerProvider({ children }: Props) {
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const {
+    playlists,
+    loading,
+    error,
+    selectedPlaylist,
+    setSelectedPlaylist,
+    refreshPlaylists,
+  } = usePlaylistData();
   const [isPlaying, setIsPlaying] = useState(false);
   const [ytApiReady, setYtApiReady] = useState(false);
   const [volume, setVolume] = useState(80);
@@ -67,31 +53,6 @@ export default function PlayerProvider({ children }: Props) {
   const [durationSec, setDurationSec] = useState(0);
   const playerRef = useRef<any>(null);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
-
-  async function refreshPlaylists() {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/playlists", { cache: "no-store" });
-      if (!response.ok) throw new Error("플레이리스트를 불러오지 못했습니다.");
-      const data = (await response.json()) as Playlist[];
-      setPlaylists(data);
-      setSelectedPlaylist((prev) => {
-        if (!prev) return data[0] ?? null;
-        return data.find((p) => p.id === prev.id) ?? prev;
-      });
-    } catch (e) {
-      setPlaylists(mockPlaylists);
-      setSelectedPlaylist((prev) => prev ?? mockPlaylists[0] ?? null);
-      setError("백엔드 연결 실패: 목업 데이터를 표시합니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    refreshPlaylists();
-  }, []);
 
   useEffect(() => {
     if (window.YT?.Player) {
