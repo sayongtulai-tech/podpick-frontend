@@ -458,28 +458,28 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* 태블릿·데스크톱 플레이어 */}
       <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/10 bg-[#101022]/95 px-4 py-3 backdrop-blur-md md:block">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-3">
-          <div className="flex min-w-0 items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-100">
-                  {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
-                  {isPlaying ? (
-                    <div className="waveform waveform-compact player-waveform waveform running flex shrink-0" aria-hidden>
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-slate-100">
+                {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
+                {isPlaying ? (
+                  <div className="waveform waveform-compact player-waveform waveform running flex shrink-0" aria-hidden>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
+          </div>
 
-            <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+          <div className="flex w-[min(56vw,560px)] min-w-[300px] flex-col items-center gap-2">
+            <div className="flex items-center gap-2 lg:gap-3">
               <button
                 type="button"
                 onClick={playPrevious}
@@ -504,39 +504,42 @@ function Shell({ children }: { children: React.ReactNode }) {
               >
                 ⏭
               </button>
-              <button
-                type="button"
-                onClick={toggleMute}
-                className="btn-press ml-1 flex h-11 w-11 items-center justify-center rounded-lg border border-white/15 text-base"
-                aria-label={isMuted ? "음소거 해제" : "음소거"}
-              >
-                {isMuted ? "🔇" : "🔊"}
-              </button>
+            </div>
+
+            <div className="w-full max-w-[520px]">
+              <div className="mb-1 flex items-center justify-between text-[11px] tabular-nums text-slate-400">
+                <span>{formatTime(currentTimeSec)}</span>
+                <span>{formatTime(durationSec)}</span>
+              </div>
               <input
                 type="range"
                 min={0}
-                max={100}
-                value={isMuted ? 0 : volume}
-                onChange={(e) => setVolumeLevel(Number(e.target.value))}
-                onInput={(e) => setVolumeLevel(Number((e.target as HTMLInputElement).value))}
-                className="h-2 w-24 min-h-[44px] cursor-pointer py-2"
+                max={Math.max(1, Math.floor(durationSec))}
+                value={Math.min(currentTimeSec, durationSec || 1)}
+                onChange={(e) => seekTo(Number(e.target.value))}
+                onInput={(e) => seekTo(Number((e.target as HTMLInputElement).value))}
+                className="min-h-[40px] w-full cursor-pointer py-1"
               />
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-2">
-            <div className="mb-1 flex items-center justify-between text-[11px] tabular-nums text-slate-400">
-              <span>{formatTime(currentTimeSec)}</span>
-              <span>{formatTime(durationSec)}</span>
-            </div>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="btn-press flex h-11 w-11 items-center justify-center rounded-lg border border-white/15 text-base"
+              aria-label={isMuted ? "음소거 해제" : "음소거"}
+            >
+              {isMuted ? "🔇" : "🔊"}
+            </button>
             <input
               type="range"
               min={0}
-              max={Math.max(1, Math.floor(durationSec))}
-              value={Math.min(currentTimeSec, durationSec || 1)}
-              onChange={(e) => seekTo(Number(e.target.value))}
-              onInput={(e) => seekTo(Number((e.target as HTMLInputElement).value))}
-              className="min-h-[44px] w-full cursor-pointer py-2"
+              max={100}
+              value={isMuted ? 0 : volume}
+              onChange={(e) => setVolumeLevel(Number(e.target.value))}
+              onInput={(e) => setVolumeLevel(Number((e.target as HTMLInputElement).value))}
+              className="h-2 w-24 min-h-[44px] cursor-pointer py-2"
             />
           </div>
         </div>
