@@ -120,7 +120,7 @@ function emotionCopy(emotion: string) {
 }
 
 function creatorLabel(item: Playlist) {
-  return `by PodPick User #${(item.id % 97) + 3}`;
+  return `by ${item.creatorName?.trim() || `PodPick User #${(item.id % 97) + 3}`}`;
 }
 
 function HomePageContent() {
@@ -193,8 +193,13 @@ function HomePageContent() {
 
   async function copyShareLink(item: Playlist) {
     try {
+      const shareToken = item.shareId?.trim();
+      if (!shareToken) {
+        setShareToast("공유 링크를 생성할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
       const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const shareLink = `${origin}/?playlist=${item.id}`;
+      const shareLink = `${origin}/share/${encodeURIComponent(shareToken)}`;
       await navigator.clipboard.writeText(shareLink);
       setShareToast("링크를 복사했어요.");
     } catch {
@@ -236,14 +241,70 @@ function HomePageContent() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-        <h1 className="text-2xl font-black text-white md:text-3xl">
-          지금 기분에 맞는{" "}
-          <span className="bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent">
-            PodPick
-          </span>
-        </h1>
-        <p className="mt-2 text-sm text-slate-300">감정으로 음악을 고르고, 사람들이 만든 플레이리스트를 발견하세요.</p>
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#121226]/90 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] md:p-7">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-violet-500/30 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 top-8 h-52 w-52 rounded-full bg-pink-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-cyan-400/15 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(140deg,rgba(168,85,247,0.08)_0%,rgba(236,72,153,0.05)_45%,rgba(56,189,248,0.04)_100%)]" />
+
+        <div className="relative grid gap-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-end">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/35 bg-violet-500/15 px-3 py-1 text-[11px] font-medium text-violet-100">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-200" />
+                live mood feed
+              </span>
+              <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
+                {EMOTION_EMOJI[feedInsights.hottestMood] ?? "✨"} 지금 인기: {feedInsights.hottestMood}
+              </span>
+            </div>
+
+            <h1 className="text-2xl font-black leading-tight text-white md:text-[2.2rem] md:leading-[1.15]">
+              지금 감정을 듣는 가장
+              <br />
+              <span className="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent">
+                몰입적인 방법, PodPick
+              </span>
+            </h1>
+
+            <p className="mt-3 max-w-xl text-sm text-slate-300 md:text-base">
+              감정 기반 추천과 소셜 피드를 한 번에. 지금 분위기에 맞는 플레이리스트를 발견하고, 너의 무드를 바로 공유해보세요.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <span className="rounded-full border border-violet-300/40 bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-100 shadow-[0_6px_18px_rgba(124,58,237,0.25)]">
+                {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "🎵"} 오늘의 감정: {feedInsights.mostSavedEmotion}
+              </span>
+              <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-slate-300">
+                추천 무드 카피: {emotionCopy(feedInsights.hottestMood)}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/10 to-transparent p-4 backdrop-blur-sm">
+              <p className="text-[11px] uppercase tracking-wide text-slate-300">오늘의 spotlight</p>
+              <p className="mt-2 truncate text-lg font-semibold text-white">
+                {feedInsights.dawnPick?.title ?? "지금 인기 무드 큐레이션"}
+              </p>
+              <p className="mt-1 text-xs text-slate-300">
+                {feedInsights.dawnPick
+                  ? `${EMOTION_EMOJI[feedInsights.dawnPick.emotion] ?? "🎵"} ${feedInsights.dawnPick.emotion} · ${creatorLabel(feedInsights.dawnPick)}`
+                  : "새로운 감정 플레이리스트가 올라오고 있어요"}
+              </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-xl border border-pink-300/30 bg-pink-500/15 px-3 py-2 text-pink-100">
+                  ❤️ hottest mood
+                </div>
+                <div className="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-3 py-2 text-emerald-100">
+                  📌 saved trend
+                </div>
+              </div>
+            </div>
+            <div className="pointer-events-none absolute -bottom-6 right-4 h-16 w-16 animate-pulse rounded-full bg-fuchsia-400/20 blur-2xl" />
+          </div>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
@@ -394,15 +455,15 @@ function HomePageContent() {
           </select>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
           {filteredPlaylists.map((item: Playlist) => {
             const isEditing = editingId === item.id;
             return (
               <div
                 key={item.id}
-                className={`group relative overflow-hidden rounded-2xl border bg-[#121225] p-4 shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl ${cardAccentClass(item.emotion)}`}
+                className={`group relative overflow-hidden rounded-3xl border bg-[#121225] p-5 shadow-[0_16px_40px_rgba(2,6,23,0.4)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_24px_60px_rgba(2,6,23,0.55)] ${cardAccentClass(item.emotion)}`}
               >
-                <div className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${cardAccentClass(item.emotion).split(" ").slice(0, 3).join(" ")}`} />
+                <div className={`pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b ${cardAccentClass(item.emotion).split(" ").slice(0, 3).join(" ")}`} />
                 {isEditing ? (
                   <div className="relative space-y-3">
                     <input
@@ -447,32 +508,32 @@ function HomePageContent() {
                   </div>
                 ) : (
                   <div className="relative">
-                    <div className="mb-4 overflow-hidden rounded-xl border border-white/10 bg-[#0d1120]">
+                    <div className="mb-5 overflow-hidden rounded-2xl border border-white/15 bg-[#0d1120] shadow-[0_12px_30px_rgba(2,6,23,0.4)]">
                       <div
-                        className={`relative aspect-[16/9] overflow-hidden bg-gradient-to-br ${thumbBgClass(item.emotion)} before:absolute before:inset-0 before:content-[''] after:absolute after:inset-0 after:content-[''] ${thumbEffectClass(item.emotion)}`}
+                        className={`relative aspect-[16/10] overflow-hidden bg-gradient-to-br ${thumbBgClass(item.emotion)} before:absolute before:inset-0 before:content-[''] after:absolute after:inset-0 after:content-[''] ${thumbEffectClass(item.emotion)}`}
                       >
-                        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(2,6,23,0.72)_100%)]" />
-                        <div className="absolute -inset-y-6 -left-16 w-40 rotate-6 bg-white/10 blur-2xl transition-transform duration-500 ease-out group-hover:translate-x-4" />
-                        <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-violet-400/20 blur-3xl transition duration-500 ease-out group-hover:scale-125 group-hover:opacity-95" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 transition-all duration-500 ease-out group-hover:translate-x-4 group-hover:opacity-100" />
-                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/30 bg-black/25 text-lg shadow-[0_4px_18px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.06)_5%,rgba(2,6,23,0.25)_42%,rgba(2,6,23,0.85)_100%)]" />
+                        <div className="absolute -inset-y-8 -left-20 w-48 rotate-6 bg-white/10 blur-2xl transition-transform duration-500 ease-out group-hover:translate-x-5" />
+                        <div className="absolute -right-14 -top-12 h-36 w-36 rounded-full bg-violet-400/25 blur-3xl transition duration-500 ease-out group-hover:scale-125 group-hover:opacity-95" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-all duration-500 ease-out group-hover:translate-x-5 group-hover:opacity-100" />
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                          <div className="flex min-w-0 items-end gap-2.5">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-black/25 text-lg shadow-[0_4px_18px_rgba(0,0,0,0.35)] backdrop-blur-sm">
                               {EMOTION_EMOJI[item.emotion] ?? "🎵"}
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-white drop-shadow-sm">{item.title}</p>
-                              <p className="truncate text-[11px] text-slate-200/90">{emotionCopy(item.emotion)}</p>
+                              <p className="line-clamp-2 text-base font-semibold leading-snug text-white drop-shadow-sm">{item.title}</p>
+                              <p className="mt-1 line-clamp-2 text-xs text-slate-200/90">{emotionCopy(item.emotion)}</p>
                             </div>
                           </div>
-                          <span className="rounded-full border border-white/20 bg-black/35 px-2 py-0.5 text-[10px] text-slate-100 backdrop-blur-sm">
+                          <span className="rounded-full border border-white/20 bg-black/35 px-2.5 py-1 text-[10px] text-slate-100 backdrop-blur-sm">
                             #mood
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <span
                         className={`inline-flex w-fit max-w-full truncate rounded-full border px-2.5 py-1 text-xs font-medium ${
                           EMOTION_INTRO_CHIP_CLASS[item.emotion] ??
@@ -500,9 +561,9 @@ function HomePageContent() {
                       </button>
                     </div>
 
-                    <p className="mt-2 text-[11px] text-slate-400">{creatorLabel(item)}</p>
+                    <p className="mt-2 text-xs text-slate-400">{creatorLabel(item)}</p>
 
-                    <div className="mt-4 flex flex-wrap gap-2.5">
+                    <div className="mt-5 flex flex-wrap items-center gap-2.5 border-t border-white/10 pt-3">
                       <button
                         type="button"
                         onClick={() => playPlaylist(item)}

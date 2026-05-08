@@ -5,4 +5,6 @@ export type Playlist = {
   musicUrl: string | null;
   likeCount: number;
   savedCount: number;
+  shareId?: string;
+  creatorName?: string;
 };
