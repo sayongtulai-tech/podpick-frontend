@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { usePlayer } from "@/components/player/PlayerProvider";
@@ -219,7 +220,7 @@ function HomePageContent() {
     try {
       const shareToken = item.shareId?.trim();
       if (!shareToken) {
-        setShareToast("공유 링크를 생성할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+        setShareToast("공유 링크를 만들 수 없어요. shareId가 있을 때만 /share/ 주소로 공유돼요.");
         return;
       }
       const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -254,6 +255,11 @@ function HomePageContent() {
   }, [shareToast]);
 
   function openSharePanel(item: Playlist) {
+    const token = item.shareId?.trim();
+    if (!token) {
+      setShareToast("공유할 수 없어요. shareId가 있을 때만 /share/ 링크를 열 수 있어요.");
+      return;
+    }
     setShareTarget(item);
     setSharePanelActive(false);
   }
@@ -265,23 +271,6 @@ function HomePageContent() {
 
   return (
     <div className="space-y-5">
-      {sessionStatus === "unauthenticated" ? (
-        <section className="md:hidden rounded-2xl border border-violet-300/25 bg-gradient-to-br from-violet-500/18 via-[#151528]/90 to-pink-500/12 p-4 shadow-[0_16px_48px_rgba(76,29,149,0.22)]">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-200/90">감정 기반 음악 발견</p>
-          <p className="mt-1 text-sm font-semibold text-white">지금 무드에 맞는 소리를 탐색해 보세요</p>
-          <p className="mt-1 text-xs leading-relaxed text-slate-300">
-            로그인 없이 아래 피드를 둘러보고, 저장·공유는 Google 로그인 후 이용할 수 있어요.
-          </p>
-          <button
-            type="button"
-            onClick={() => signIn("google")}
-            className="btn-press mt-3 w-full rounded-xl border border-violet-200/40 bg-gradient-to-r from-violet-500/85 to-pink-500/80 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(168,85,247,0.35)]"
-          >
-            Google로 시작하기
-          </button>
-        </section>
-      ) : null}
-
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#0c0c18]/95 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.55)] md:p-7">
         {/* Ambient mesh + orbs */}
         <div
@@ -310,6 +299,55 @@ function HomePageContent() {
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] opacity-[0.35]" />
 
         <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end">
+          {sessionStatus === "loading" ? (
+            <div className="flex flex-col gap-3 lg:col-span-2">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-inner">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="h-9 w-9 skeleton-premium shrink-0 rounded-full" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-3 w-40 skeleton-premium rounded-full sm:w-56" />
+                    <div className="h-2.5 w-full max-w-md skeleton-premium rounded-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {sessionStatus === "unauthenticated" ? (
+            <div className="lg:col-span-2">
+              <div className="relative overflow-hidden rounded-2xl border border-violet-300/30 bg-gradient-to-br from-violet-500/[0.14] via-[#141428]/95 to-pink-500/[0.12] p-4 shadow-[0_16px_48px_rgba(76,29,149,0.28)] sm:p-5">
+                <div className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full bg-fuchsia-500/20 blur-3xl" />
+                <div className="pointer-events-none absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-violet-500/25 blur-3xl" />
+                <div className="relative grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-200/95">감성 랜딩</p>
+                    <p className="mt-1 text-lg font-bold tracking-tight text-white sm:text-xl">
+                      로그인 없이도 무드 피드를 바로 들을 수 있어요
+                    </p>
+                    <p className="mt-2 max-w-xl text-xs leading-relaxed text-slate-300 sm:text-sm">
+                      아래 라이브 히어로와 추천 탭에서 감정별 플레이리스트를 재생해 보세요. 저장·내 목록·공유는 Google 로그인 후 이용할 수 있어요.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        href="/explore"
+                        className="btn-press inline-flex items-center rounded-full border border-white/20 bg-white/[0.08] px-4 py-2 text-xs font-semibold text-white hover:bg-white/[0.12]"
+                      >
+                        무드 탐색하기
+                      </Link>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => signIn("google")}
+                    className="btn-press relative w-full shrink-0 rounded-xl border border-violet-200/45 bg-gradient-to-r from-violet-500/90 to-pink-500/85 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(168,85,247,0.4)] sm:w-auto sm:self-center sm:py-3.5"
+                  >
+                    Google로 시작하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <div>
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100/95 shadow-[0_0_24px_rgba(52,211,153,0.18)]">
@@ -491,9 +529,13 @@ function HomePageContent() {
         <h2 className="text-lg font-bold text-white">인기 플레이리스트</h2>
         {loading ? (
           <div className="mt-4 rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 via-transparent to-pink-500/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-live-dot rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]" />
-              <p className="text-xs uppercase tracking-wide text-violet-100/90">syncing mood feed</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/55 opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.65)]" />
+              </span>
+              <div className="h-3 flex-1 min-w-[120px] max-w-xs skeleton-premium rounded-full sm:h-3.5" />
+              <div className="hidden h-3 w-24 skeleton-premium rounded-full sm:block" />
             </div>
             <div className="mt-3 grid gap-3 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -714,8 +756,12 @@ function HomePageContent() {
                       <button
                         type="button"
                         onClick={() => openSharePanel(item)}
-                        className="ml-auto rounded-full border border-violet-300/30 bg-violet-500/15 px-2.5 py-0.5 text-[11px] text-violet-100 transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-violet-500/25 active:scale-[0.98]"
-                        title="공유"
+                        className={`ml-auto rounded-full border px-2.5 py-0.5 text-[11px] transition-all duration-300 ease-out ${
+                          item.shareId?.trim()
+                            ? "border-violet-300/30 bg-violet-500/15 text-violet-100 hover:scale-[1.03] hover:bg-violet-500/25 active:scale-[0.98]"
+                            : "cursor-pointer border-white/10 bg-white/[0.06] text-slate-500 hover:bg-white/[0.09]"
+                        }`}
+                        title={item.shareId?.trim() ? "공유 (/share/ 링크)" : "shareId 없음 — 공유 불가"}
                       >
                         🔗 공유
                       </button>
@@ -826,6 +872,11 @@ function HomePageContent() {
             <p className="mt-1 text-xs text-slate-400">
               {EMOTION_EMOJI[shareTarget.emotion] ?? "🎵"} {shareTarget.emotion}
             </p>
+            {shareTarget.shareId?.trim() ? (
+              <p className="mt-2 truncate rounded-lg border border-white/10 bg-black/35 px-2 py-1.5 font-mono text-[10px] text-slate-400">
+                /share/{shareTarget.shareId.trim()}
+              </p>
+            ) : null}
 
             <div className="mt-4 overflow-hidden rounded-xl border border-white/15 bg-[#0f1325]">
               <div className={`relative aspect-[16/10] bg-gradient-to-br ${thumbBgClass(shareTarget.emotion)}`}>
@@ -925,22 +976,33 @@ export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/12 via-[#0d0d18] to-pink-500/10 p-8">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_14px_rgba(52,211,153,0.55)]" />
-              <p className="text-xs uppercase tracking-[0.2em] text-violet-100/90">preparing your mood space</p>
-            </div>
-            <p className="text-[11px] text-slate-500">프리미엄 무드 레이아웃을 불러오는 중이에요.</p>
-          </div>
-          <div className="mx-auto mt-6 grid max-w-3xl gap-3 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="h-24 skeleton-premium rounded-lg" />
-                <div className="mt-3 h-3 skeleton-premium rounded" />
-                <div className="mt-2 h-2.5 w-2/3 skeleton-premium rounded" />
+        <div className="space-y-5">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0c0c18]/95 p-6 md:p-8">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(124,58,237,0.2),transparent_55%)]" />
+            <div className="relative space-y-4">
+              <div className="flex gap-2">
+                <div className="h-8 w-24 skeleton-premium rounded-full" />
+                <div className="h-8 flex-1 max-w-[180px] skeleton-premium rounded-full" />
               </div>
-            ))}
+              <div className="h-12 max-w-lg skeleton-premium rounded-xl" />
+              <div className="h-4 max-w-md skeleton-premium rounded-lg" />
+              <div className="grid gap-3 pt-2 md:grid-cols-2">
+                <div className="h-36 skeleton-premium rounded-2xl border border-white/5" />
+                <div className="h-36 skeleton-premium rounded-2xl border border-white/5" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="h-6 w-48 skeleton-premium rounded-lg" />
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="aspect-[16/9] skeleton-premium rounded-lg" />
+                  <div className="mt-3 h-3 w-2/3 skeleton-premium rounded" />
+                  <div className="mt-2 h-2.5 w-1/2 skeleton-premium rounded" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       }

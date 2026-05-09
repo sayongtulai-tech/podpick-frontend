@@ -65,7 +65,24 @@ export default function BookmarksPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-400">불러오는 중...</p>
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/[0.08] via-[#141427]/95 to-pink-500/[0.06] p-5 shadow-inner">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/45 opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
+            <div className="h-3 flex-1 max-w-xs skeleton-premium rounded-full" />
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="h-28 skeleton-premium rounded-lg" />
+                <div className="mt-3 h-3 w-4/5 skeleton-premium rounded" />
+                <div className="mt-2 h-2.5 w-1/2 skeleton-premium rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : error ? (
         <p className="text-sm text-rose-300">{error}</p>
       ) : (

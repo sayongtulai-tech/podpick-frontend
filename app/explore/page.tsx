@@ -51,7 +51,21 @@ export default function ExplorePage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-400">불러오는 중...</p>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="h-8 w-32 skeleton-premium rounded-lg" />
+            <div className="h-8 flex-1 min-w-[120px] max-w-md skeleton-premium rounded-lg" />
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-[#16162a]/80 p-4">
+                <div className="h-24 skeleton-premium rounded-xl" />
+                <div className="mt-3 h-4 w-3/4 skeleton-premium rounded" />
+                <div className="mt-2 h-3 w-1/3 skeleton-premium rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : error ? (
         <p className="text-sm text-rose-300">{error}</p>
       ) : playlists.length === 0 ? (

@@ -92,8 +92,18 @@ export default function SharePage() {
 
   if (loading) {
     return (
-      <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
-        <p className="text-sm text-slate-300">공유 플레이리스트를 불러오는 중...</p>
+      <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-white/10 bg-gradient-to-br from-violet-500/[0.06] via-[#141427]/95 to-pink-500/[0.05] p-6 md:p-8">
+        <div className="flex justify-center gap-2 pb-4">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400/45 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-400" />
+          </span>
+        </div>
+        <div className="aspect-[16/10] skeleton-premium rounded-2xl border border-white/5" />
+        <div className="mx-auto mt-6 max-w-md space-y-2">
+          <div className="h-4 skeleton-premium rounded-lg" />
+          <div className="h-3 w-2/3 skeleton-premium rounded-lg" />
+        </div>
       </section>
     );
   }

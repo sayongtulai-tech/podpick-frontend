@@ -170,10 +170,10 @@ function HeaderProfileMenu() {
         aria-busy="true"
         aria-label="프로필 로딩 중"
       >
-        <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-white/15" />
+        <div className="h-8 w-8 shrink-0 skeleton-premium rounded-full" />
         <div className="hidden min-w-[72px] space-y-1.5 sm:block">
-          <div className="h-2.5 w-16 animate-pulse rounded bg-white/15" />
-          <div className="h-2 w-12 animate-pulse rounded bg-white/10" />
+          <div className="h-2.5 w-16 skeleton-premium rounded" />
+          <div className="h-2 w-12 skeleton-premium rounded opacity-80" />
         </div>
       </div>
     );
@@ -311,10 +311,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="mt-6 border-t border-white/10 pt-4">
             {status === "loading" ? (
-              <div className="space-y-2 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-3">
-                <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
-                <div className="h-10 animate-pulse rounded-lg bg-white/10" />
-                <div className="h-8 animate-pulse rounded-lg bg-white/10" />
+              <div className="space-y-2.5 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-3 shadow-inner">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 shrink-0 rounded-full bg-violet-400/40 shadow-[0_0_10px_rgba(167,139,250,0.35)]" />
+                  <div className="h-2.5 w-28 skeleton-premium rounded-full" />
+                </div>
+                <div className="h-10 skeleton-premium rounded-lg" />
+                <div className="h-8 skeleton-premium rounded-lg" />
               </div>
             ) : session?.user ? (
               <div className="space-y-3">
@@ -470,16 +473,26 @@ function Shell({ children }: { children: React.ReactNode }) {
             ) : (
               <div className="relative p-5">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(124,58,237,0.2),transparent_55%),radial-gradient(ellipse_at_80%_80%,rgba(236,72,153,0.14),transparent_50%)]" />
-                <div className="relative aspect-video overflow-hidden rounded-xl border border-dashed border-white/15 bg-gradient-to-br from-violet-500/15 via-[#1a1a2e] to-pink-500/12 shadow-inner">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-500/[0.12] via-[#141428] to-pink-500/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
-                  <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
-                    <span className="text-3xl opacity-90">🎧</span>
-                    <div className="h-1 w-16 rounded-full bg-white/10" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.08),transparent_65%)]" />
+                  <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 px-4 text-center">
+                    <span className="text-4xl opacity-95 drop-shadow-[0_8px_24px_rgba(139,92,246,0.35)]">🌙</span>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-200/90">quiet stage</p>
+                    <div className="flex h-8 items-end justify-center gap-0.5 opacity-50">
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className="w-0.5 rounded-full bg-gradient-to-t from-violet-600/40 to-fuchsia-400/50"
+                          style={{ height: `${10 + (i % 4) * 5}px` }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <p className="relative mt-4 text-sm font-semibold text-slate-100">재생 대기 중</p>
+                <p className="relative mt-4 text-sm font-semibold text-white">아직 재생 중인 무드가 없어요</p>
                 <p className="relative mt-1 text-xs leading-relaxed text-slate-400">
-                  감정 피드에서 플레이리스트를 선택하면 여기에 커버와 무드가 살아나요.
+                  피드에서 카드를 눌러 재생하면 커버와 무드 라이트가 이 패널에 이어져요.
                 </p>
               </div>
             )}
@@ -489,10 +502,12 @@ function Shell({ children }: { children: React.ReactNode }) {
             <p className="text-xs font-semibold tracking-wide text-slate-400">재생목록</p>
             <ul className="mt-2 max-h-64 space-y-0.5 overflow-y-auto pr-1 text-sm">
               {playlists.length === 0 ? (
-                <li className="rounded-lg border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.03] px-3 py-4 text-center">
-                  <p className="text-lg">🎧</p>
-                  <p className="mt-1 text-xs text-slate-300">재생목록을 준비 중이에요</p>
-                  <p className="mt-1 text-[11px] text-slate-500">잠시 후 감정 기반 추천이 표시됩니다.</p>
+                <li className="rounded-xl border border-violet-300/15 bg-gradient-to-br from-violet-500/[0.08] via-[#16162a] to-pink-500/[0.06] px-4 py-5 text-center shadow-inner">
+                  <p className="text-2xl">✨</p>
+                  <p className="mt-2 text-xs font-semibold text-slate-100">큐가 비어 있어요</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                    홈 피드가 채워지면 감정별 플레이리스트가 이 길 위에 차례로 올라와요.
+                  </p>
                 </li>
               ) : (
                 playlists.map((p) => {
@@ -586,7 +601,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
-                {selectedPlaylist?.title ?? "선택된 곡 없음"}
+                {selectedPlaylist?.title ?? "무드를 골라주세요"}
               </p>
               <div className="mt-0.5 flex flex-wrap items-center gap-2">
                 <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
@@ -652,7 +667,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
-                {selectedPlaylist?.title ?? "아직 선택된 곡이 없어요"}
+                {selectedPlaylist?.title ?? "재생할 무드를 선택해 주세요"}
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
