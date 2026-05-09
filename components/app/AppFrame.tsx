@@ -379,7 +379,11 @@ function Shell({ children }: { children: React.ReactNode }) {
 
         <section className="min-w-0 flex-1">{children}</section>
 
-        <aside className="hidden w-80 shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4 xl:block">
+        <aside
+          className={`hidden shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4 xl:block ${
+            selectedPlaylist ? "w-80" : "w-72 opacity-90"
+          }`}
+        >
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-semibold tracking-wide text-slate-400">현재 재생</p>
             {selectedPlaylist ? (
@@ -392,7 +396,9 @@ function Shell({ children }: { children: React.ReactNode }) {
             ) : null}
           </div>
           <div
-            className="relative mt-3 overflow-hidden rounded-2xl border border-white/10 bg-[#12121f]/95 shadow-[0_20px_56px_rgba(0,0,0,0.45)]"
+            className={`relative mt-3 overflow-hidden rounded-2xl border border-white/10 bg-[#12121f]/95 ${
+              selectedPlaylist ? "shadow-[0_20px_56px_rgba(0,0,0,0.45)]" : "shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
+            }`}
             style={{
               boxShadow:
                 selectedPlaylist && isPlaying
@@ -471,15 +477,15 @@ function Shell({ children }: { children: React.ReactNode }) {
                 </div>
               </>
             ) : (
-              <div className="relative p-5">
+              <div className="relative p-4">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(124,58,237,0.2),transparent_55%),radial-gradient(ellipse_at_80%_80%,rgba(236,72,153,0.14),transparent_50%)]" />
-                <div className="relative aspect-video overflow-hidden rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-500/[0.12] via-[#141428] to-pink-500/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                <div className="relative h-28 overflow-hidden rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-500/[0.12] via-[#141428] to-pink-500/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.08),transparent_65%)]" />
                   <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 px-4 text-center">
-                    <span className="text-4xl opacity-95 drop-shadow-[0_8px_24px_rgba(139,92,246,0.35)]">🌙</span>
+                    <span className="text-3xl opacity-95 drop-shadow-[0_8px_24px_rgba(139,92,246,0.35)]">🌙</span>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-200/90">quiet stage</p>
-                    <div className="flex h-8 items-end justify-center gap-0.5 opacity-50">
+                    <div className="flex h-6 items-end justify-center gap-0.5 opacity-50">
                       {Array.from({ length: 12 }).map((_, i) => (
                         <span
                           key={i}
@@ -490,9 +496,9 @@ function Shell({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
                 </div>
-                <p className="relative mt-4 text-sm font-semibold text-white">아직 재생 중인 무드가 없어요</p>
+                <p className="relative mt-3 text-sm font-semibold text-white">감정을 고르면 사운드가 켜져요</p>
                 <p className="relative mt-1 text-xs leading-relaxed text-slate-400">
-                  피드에서 카드를 눌러 재생하면 커버와 무드 라이트가 이 패널에 이어져요.
+                  홈 Hero에서 무드를 선택하면 이 공간이 바로 재생 스테이지로 바뀝니다.
                 </p>
               </div>
             )}
@@ -502,12 +508,9 @@ function Shell({ children }: { children: React.ReactNode }) {
             <p className="text-xs font-semibold tracking-wide text-slate-400">재생목록</p>
             <ul className="mt-2 max-h-64 space-y-0.5 overflow-y-auto pr-1 text-sm">
               {playlists.length === 0 ? (
-                <li className="rounded-xl border border-violet-300/15 bg-gradient-to-br from-violet-500/[0.08] via-[#16162a] to-pink-500/[0.06] px-4 py-5 text-center shadow-inner">
-                  <p className="text-2xl">✨</p>
-                  <p className="mt-2 text-xs font-semibold text-slate-100">큐가 비어 있어요</p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                    홈 피드가 채워지면 감정별 플레이리스트가 이 길 위에 차례로 올라와요.
-                  </p>
+                <li className="rounded-xl border border-violet-300/12 bg-gradient-to-br from-violet-500/[0.06] via-[#16162a] to-pink-500/[0.05] px-3 py-3 text-center shadow-inner">
+                  <p className="text-lg">✨</p>
+                  <p className="mt-1 text-[11px] font-semibold text-slate-200">첫 무드를 고르면 여기에 큐가 생겨요</p>
                 </li>
               ) : (
                 playlists.map((p) => {
@@ -601,7 +604,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold text-slate-100">
-                {selectedPlaylist?.title ?? "무드를 골라주세요"}
+                {selectedPlaylist?.title ?? "지금 마음에 맞는 사운드를 골라보세요"}
               </p>
               <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                 <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
