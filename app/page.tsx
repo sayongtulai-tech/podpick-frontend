@@ -270,8 +270,8 @@ function HomePageContent() {
   }
 
   return (
-    <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#0c0c18]/95 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.55)] md:p-7">
+    <div className="space-y-4 md:space-y-5">
+      <section className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#0c0c18]/95 p-4 shadow-[0_24px_80px_rgba(2,6,23,0.55)] md:rounded-3xl md:p-7">
         {/* Ambient mesh + orbs */}
         <div
           className="pointer-events-none absolute inset-0 animate-hero-shimmer opacity-90"
@@ -298,7 +298,7 @@ function HomePageContent() {
         {/* Fine grid — cinematic density */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] opacity-[0.35]" />
 
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end">
+        <div className="relative grid gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end">
           {sessionStatus === "loading" ? (
             <div className="flex flex-col gap-3 lg:col-span-2">
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-inner">
@@ -315,41 +315,55 @@ function HomePageContent() {
 
           {sessionStatus === "unauthenticated" ? (
             <div className="lg:col-span-2">
-              <div className="relative overflow-hidden rounded-2xl border border-violet-300/30 bg-gradient-to-br from-violet-500/[0.14] via-[#141428]/95 to-pink-500/[0.12] p-4 shadow-[0_16px_48px_rgba(76,29,149,0.28)] sm:p-5">
+              <div className="relative overflow-hidden rounded-2xl border border-violet-300/30 bg-gradient-to-br from-violet-500/[0.14] via-[#141428]/95 to-pink-500/[0.12] p-3.5 shadow-[0_16px_48px_rgba(76,29,149,0.28)] sm:p-5">
                 <div className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full bg-fuchsia-500/20 blur-3xl" />
                 <div className="pointer-events-none absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-violet-500/25 blur-3xl" />
-                <div className="relative grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-200/95">감성 랜딩</p>
-                    <p className="mt-1 text-lg font-bold tracking-tight text-white sm:text-xl">
-                      로그인 없이도 무드 피드를 바로 들을 수 있어요
-                    </p>
-                    <p className="mt-2 max-w-xl text-xs leading-relaxed text-slate-300 sm:text-sm">
-                      아래 라이브 히어로와 추천 탭에서 감정별 플레이리스트를 재생해 보세요. 저장·내 목록·공유는 Google 로그인 후 이용할 수 있어요.
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Link
-                        href="/explore"
-                        className="btn-press inline-flex items-center rounded-full border border-white/20 bg-white/[0.08] px-4 py-2 text-xs font-semibold text-white hover:bg-white/[0.12]"
-                      >
-                        무드 탐색하기
-                      </Link>
+                <div className="relative">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-200/95">podpick landing</p>
+                  <p className="mt-1 text-[1.05rem] font-bold tracking-tight text-white sm:text-2xl">
+                    감정으로 음악을 고르고, 오늘의 무드를 발견하세요
+                  </p>
+                  <p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-slate-300 sm:text-sm">
+                    로그인 없이도 감정 피드를 듣고 탐색할 수 있어요. Google로 시작하면 플레이리스트 저장과 공유까지 한 번에 이어집니다.
+                  </p>
+
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-xl border border-white/15 bg-black/20 px-2.5 py-2 sm:px-3">
+                      <p className="text-[10px] uppercase tracking-wide text-violet-200">emotion first</p>
+                      <p className="mt-1 text-xs font-semibold text-white">감정으로 음악을 고른다</p>
+                    </div>
+                    <div className="rounded-xl border border-white/15 bg-black/20 px-2.5 py-2 sm:px-3">
+                      <p className="text-[10px] uppercase tracking-wide text-pink-200">share your vibe</p>
+                      <p className="mt-1 text-xs font-semibold text-white">플레이리스트를 공유한다</p>
+                    </div>
+                    <div className="rounded-xl border border-white/15 bg-black/20 px-2.5 py-2 sm:px-3">
+                      <p className="text-[10px] uppercase tracking-wide text-emerald-200">daily discover</p>
+                      <p className="mt-1 text-xs font-semibold text-white">오늘의 무드를 발견한다</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => signIn("google")}
-                    className="btn-press relative w-full shrink-0 rounded-xl border border-violet-200/45 bg-gradient-to-r from-violet-500/90 to-pink-500/85 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(168,85,247,0.4)] sm:w-auto sm:self-center sm:py-3.5"
-                  >
-                    Google로 시작하기
-                  </button>
+
+                  <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => signIn("google")}
+                      className="btn-press relative inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-violet-200/45 bg-gradient-to-r from-violet-500/90 to-pink-500/85 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(168,85,247,0.4)] sm:w-auto"
+                    >
+                      Google로 시작하기
+                    </button>
+                    <Link
+                      href="/explore"
+                      className="btn-press inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.08] px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/[0.12] sm:w-auto"
+                    >
+                      감정 탐색하기
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           ) : null}
 
           <div>
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2 md:mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100/95 shadow-[0_0_24px_rgba(52,211,153,0.18)]">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-75" />
@@ -357,13 +371,13 @@ function HomePageContent() {
                 </span>
                 live mood
               </span>
-              <span className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] text-slate-300 backdrop-blur-sm">
+              <span className="hidden rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] text-slate-300 backdrop-blur-sm sm:inline-flex">
                 피드 무드 에너지{" "}
                 <span className="font-semibold tabular-nums text-white">
                   {feedInsights.engagementPulse.toLocaleString()}
                 </span>
               </span>
-              <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[11px] text-slate-400">
+              <span className="hidden rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[11px] text-slate-400 lg:inline-flex">
                 리스너들이 같은 무드를 탐색 중 · 실시간 피드 동기화
               </span>
             </div>
@@ -397,7 +411,7 @@ function HomePageContent() {
               </div>
             </div>
 
-            <h1 className="mt-5 text-2xl font-black leading-tight tracking-tight text-white md:text-[2.35rem] md:leading-[1.12]">
+            <h1 className="mt-4 text-[1.55rem] font-black leading-tight tracking-tight text-white md:mt-5 md:text-[2.35rem] md:leading-[1.12]">
               지금 감정을 듣는 가장
               <br />
               <span className="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(167,139,250,0.35)]">
@@ -405,12 +419,12 @@ function HomePageContent() {
               </span>
             </h1>
 
-            <p className="mt-3 max-w-xl text-sm text-slate-300 md:text-base md:leading-relaxed">
+            <p className="mt-2 max-w-xl text-xs text-slate-300 md:mt-3 md:text-base md:leading-relaxed">
               감정 기반 추천과 소셜 피드를 한 화면에. 무드에 맞는 플레이리스트를 발견하고, 바로 재생해 보세요.
             </p>
 
             {/* Mood ticker — discover-page density */}
-            <div className="relative mt-5 overflow-hidden rounded-full border border-white/10 bg-black/30 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="relative mt-4 hidden overflow-hidden rounded-full border border-white/10 bg-black/30 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:block">
               <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[#0a0a14] to-transparent" />
               <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[#0a0a14] to-transparent" />
               <div className="animate-marquee flex w-max gap-8 whitespace-nowrap pr-8">
@@ -427,7 +441,7 @@ function HomePageContent() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2 md:mt-4">
               <span className="rounded-full border border-violet-300/40 bg-violet-500/15 px-3 py-1.5 text-xs font-medium text-violet-100 shadow-[0_6px_18px_rgba(124,58,237,0.25)]">
                 {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "🎵"} 오늘 많이 담긴 감정 · {feedInsights.mostSavedEmotion}
               </span>
@@ -437,7 +451,7 @@ function HomePageContent() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative hidden lg:block">
             <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.12] via-white/[0.04] to-transparent p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -491,31 +505,31 @@ function HomePageContent() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-white">오늘의 감정 피드</h2>
           <span className="rounded-full border border-violet-300/30 bg-violet-500/15 px-3 py-1 text-[11px] text-violet-100">
             live mood
           </span>
         </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-violet-500/18 to-pink-500/10 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-violet-300/35 hover:shadow-[0_10px_28px_rgba(168,85,247,0.25)]">
+        <div className="grid gap-2.5 md:grid-cols-3 md:gap-3">
+          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-violet-500/18 to-pink-500/10 p-3.5 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-violet-300/35 hover:shadow-[0_10px_28px_rgba(168,85,247,0.25)] md:p-4">
             <p className="text-[11px] uppercase tracking-wide text-slate-300">오늘 많이 저장된 감정</p>
             <p className="mt-2 text-base font-semibold text-white">
               {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "🎵"} {feedInsights.mostSavedEmotion}
             </p>
             <p className="mt-1 text-xs text-slate-300">{emotionCopy(feedInsights.mostSavedEmotion)}</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-sky-500/16 to-indigo-500/10 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-sky-300/35 hover:shadow-[0_10px_28px_rgba(56,189,248,0.2)]">
+          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-sky-500/16 to-indigo-500/10 p-3.5 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-sky-300/35 hover:shadow-[0_10px_28px_rgba(56,189,248,0.2)] md:p-4">
             <p className="text-[11px] uppercase tracking-wide text-slate-300">새벽에 어울리는 플레이리스트</p>
             <p className="mt-2 truncate text-base font-semibold text-white">
-              {feedInsights.dawnPick?.title ?? "플레이리스트를 기다리는 중"}
+              {feedInsights.dawnPick?.title ?? "오늘의 무드 셀렉션"}
             </p>
             <p className="mt-1 text-xs text-slate-300">
-              {feedInsights.dawnPick ? `${feedInsights.dawnPick.emotion} · ${creatorLabel(feedInsights.dawnPick)}` : "새로운 밤 무드를 기다리고 있어요"}
+              {feedInsights.dawnPick ? `${feedInsights.dawnPick.emotion} · ${creatorLabel(feedInsights.dawnPick)}` : "지금 많이 반응하는 감정을 기준으로 큐레이션했어요"}
             </p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-fuchsia-500/16 to-rose-500/10 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-fuchsia-300/35 hover:shadow-[0_10px_28px_rgba(217,70,239,0.2)]">
+          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-fuchsia-500/16 to-rose-500/10 p-3.5 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-fuchsia-300/35 hover:shadow-[0_10px_28px_rgba(217,70,239,0.2)] md:p-4">
             <p className="text-[11px] uppercase tracking-wide text-slate-300">지금 인기 있는 무드</p>
             <p className="mt-2 text-base font-semibold text-white">
               {EMOTION_EMOJI[feedInsights.hottestMood] ?? "✨"} {feedInsights.hottestMood}
@@ -525,7 +539,7 @@ function HomePageContent() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
         <h2 className="text-lg font-bold text-white">인기 플레이리스트</h2>
         {loading ? (
           <div className="mt-4 rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 via-transparent to-pink-500/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
@@ -537,9 +551,9 @@ function HomePageContent() {
               <div className="h-3 flex-1 min-w-[120px] max-w-xs skeleton-premium rounded-full sm:h-3.5" />
               <div className="hidden h-3 w-24 skeleton-premium rounded-full sm:block" />
             </div>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="mt-3 grid gap-2.5 md:grid-cols-3 md:gap-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5 md:p-3">
                   <div className="aspect-[16/9] skeleton-premium rounded-lg" />
                   <div className="mt-3 h-3 w-2/3 skeleton-premium rounded" />
                   <div className="mt-2 h-2.5 w-1/2 skeleton-premium rounded" />
@@ -556,13 +570,13 @@ function HomePageContent() {
             <p className="mt-1 text-xs text-slate-500">첫 플레이리스트를 만들어 보세요</p>
           </div>
         ) : (
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-2.5 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
             {topLiked.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => playPlaylist(item)}
-                className="rounded-xl border border-white/10 bg-[#16162a] p-4 text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-violet-400/45 hover:bg-[#1a1a31] hover:shadow-lg hover:shadow-violet-950/40 active:scale-[0.99]"
+                className="rounded-xl border border-white/10 bg-[#16162a] p-3.5 text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-violet-400/45 hover:bg-[#1a1a31] hover:shadow-lg hover:shadow-violet-950/40 active:scale-[0.99] md:p-4"
               >
                 <p className="truncate text-sm font-semibold text-white">{item.title}</p>
                 <p className="mt-1 text-xs text-slate-400">{item.emotion}</p>
@@ -976,15 +990,15 @@ export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <div className="space-y-5">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0c0c18]/95 p-6 md:p-8">
+        <div className="space-y-4 md:space-y-5">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c18]/95 p-4 md:rounded-3xl md:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(124,58,237,0.2),transparent_55%)]" />
             <div className="relative space-y-4">
               <div className="flex gap-2">
                 <div className="h-8 w-24 skeleton-premium rounded-full" />
                 <div className="h-8 flex-1 max-w-[180px] skeleton-premium rounded-full" />
               </div>
-              <div className="h-12 max-w-lg skeleton-premium rounded-xl" />
+              <div className="h-10 max-w-lg skeleton-premium rounded-xl md:h-12" />
               <div className="h-4 max-w-md skeleton-premium rounded-lg" />
               <div className="grid gap-3 pt-2 md:grid-cols-2">
                 <div className="h-36 skeleton-premium rounded-2xl border border-white/5" />
@@ -992,7 +1006,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
             <div className="h-6 w-48 skeleton-premium rounded-lg" />
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (

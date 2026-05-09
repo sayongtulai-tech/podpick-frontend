@@ -278,11 +278,11 @@ function Shell({ children }: { children: React.ReactNode }) {
     durationSec > 0 ? Math.min(100, Math.max(0, (currentTimeSec / durationSec) * 100)) : 0;
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] pb-32 text-slate-100 max-md:pb-[calc(11rem+env(safe-area-inset-bottom,0px))]">
+    <main className="min-h-screen bg-[#0f0f1a] pb-32 text-slate-100 max-md:pb-[calc(12.25rem+env(safe-area-inset-bottom,0px))]">
       <div className="mx-auto flex max-w-[1600px] items-center justify-end px-3 pt-4 md:px-6">
         <HeaderProfileMenu />
       </div>
-      <div className="mx-auto flex max-w-[1600px] gap-4 px-3 py-4 md:gap-6 md:px-6">
+      <div className="mx-auto flex max-w-[1600px] gap-4 px-3 py-3 md:gap-6 md:px-6 md:py-4">
         <aside className="hidden shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3 backdrop-blur-md md:block md:w-16 lg:w-60">
           <p className="text-lg font-bold tracking-wide text-violet-300">PODPICK</p>
           <nav className="mt-6 space-y-2">
@@ -535,14 +535,14 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* 모바일: 진행바 + 탭바 + 미니 플레이어 (768px 미만) */}
       <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="border-t border-white/15 bg-gradient-to-t from-[#0e0e1a]/96 via-[#101022]/94 to-[#14142a]/92 pb-[max(0.45rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(6,8,20,0.55),0_-2px_12px_rgba(168,85,247,0.16)] backdrop-blur-xl">
+        <div className="mx-2 mb-2 overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-t from-[#0e0e1a]/96 via-[#101022]/94 to-[#14142a]/92 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-16px_40px_rgba(6,8,20,0.55),0_-2px_12px_rgba(168,85,247,0.16)] backdrop-blur-xl">
           <nav
-            className="grid grid-cols-4 border-b border-white/10 bg-[#101022]/60"
+            className="grid grid-cols-4 border-b border-white/10 bg-[#101022]/70"
             aria-label="주요 메뉴"
           >
             <Link
               href="/"
-              className={`btn-press flex min-h-[44px] flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-medium transition ${
+              className={`btn-press flex min-h-[46px] flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-medium transition ${
                 pathname === "/" ? "text-violet-300" : "text-slate-400"
               }`}
             >
@@ -553,7 +553,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               href="/explore"
-              className={`btn-press flex min-h-[44px] flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-medium transition ${
+              className={`btn-press flex min-h-[46px] flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-medium transition ${
                 pathname === "/explore" ? "text-violet-300" : "text-slate-400"
               }`}
             >
@@ -564,7 +564,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               href="/#playlist-manage"
-              className="btn-press flex min-h-[44px] flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-medium text-slate-400 transition hover:text-slate-300"
+              className="btn-press flex min-h-[46px] flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-medium text-slate-400 transition hover:text-slate-300"
             >
               <span className="text-lg leading-none" aria-hidden>
                 ➕
@@ -573,7 +573,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               href="/bookmarks"
-              className={`btn-press flex min-h-[44px] flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-medium transition ${
+              className={`btn-press flex min-h-[46px] flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-medium transition ${
                 pathname === "/bookmarks" ? "text-violet-300" : "text-slate-400"
               }`}
             >
@@ -583,7 +583,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               <span>보관함</span>
             </Link>
           </nav>
-          <div className="flex items-center gap-3 px-3 py-1.5">
+          <div className="flex items-center gap-2.5 px-3 pt-2.5">
             <div className="relative shrink-0">
               <div
                 className="absolute inset-0 rounded-xl blur-md transition-opacity duration-500"
@@ -600,14 +600,14 @@ function Shell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-100">
+              <p className="truncate text-[13px] font-semibold text-slate-100">
                 {selectedPlaylist?.title ?? "무드를 골라주세요"}
               </p>
-              <div className="mt-0.5 flex flex-wrap items-center gap-2">
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                 <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
                 {selectedPlaylist && isPlaying ? (
                   <div
-                    className="waveform panel-waveform-compact flex shrink-0 opacity-95 drop-shadow-[0_0_8px_rgba(168,85,247,0.35)] running"
+                    className="waveform panel-waveform-compact hidden shrink-0 opacity-95 drop-shadow-[0_0_8px_rgba(168,85,247,0.35)] running sm:flex"
                     aria-hidden
                   >
                     {Array.from({ length: 8 }).map((_, i) => (
@@ -617,7 +617,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 ) : null}
               </div>
               {durationSec > 0 ? (
-                <p className="mt-0.5 truncate text-[10px] tabular-nums text-slate-500">
+                <p className="mt-0.5 hidden truncate text-[10px] tabular-nums text-slate-500 sm:block">
                   {formatTime(currentTimeSec)} / {formatTime(durationSec)}
                 </p>
               ) : null}
@@ -625,7 +625,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={togglePlay}
-              className={`btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-violet-200/40 bg-gradient-to-br from-violet-400/85 to-pink-500/85 text-lg font-semibold text-white shadow-[0_8px_22px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.96] ${
+              className={`btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-violet-200/40 bg-gradient-to-br from-violet-400/85 to-pink-500/85 text-lg font-semibold text-white shadow-[0_8px_22px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.96] ${
                 isPlaying ? "animate-pulse" : ""
               }`}
               aria-label={isPlaying ? "일시정지" : "재생"}
@@ -635,7 +635,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* mini player 아래쪽 진행바 */}
-          <div className="px-3 pb-1">
+          <div className="px-3 pb-1.5 pt-1">
             <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)]">
               <div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.45)] transition-[width] duration-200"
