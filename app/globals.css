@@ -127,6 +127,10 @@ body {
   }
 }
 
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -220,4 +224,64 @@ input[type="range"]::-webkit-slider-thumb {
   transform: translateY(-1px);
   box-shadow: 0 0 24px rgba(236, 72, 153, 0.45);
   filter: brightness(1.05);
+}
+
+/* Premium skeleton — shimmer without touching data logic */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-premium {
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.14) 42%,
+    rgba(255, 255, 255, 0.06) 78%
+  );
+  background-size: 240% 100%;
+  animation: skeletonShimmer 2.2s ease-in-out infinite;
+}
+
+/* Sidebar / panel waveform — slightly taller for immersion */
+.waveform.panel-waveform {
+  height: 34px;
+  gap: 3px;
+  min-width: 140px;
+}
+
+.waveform.panel-waveform .waveform-bar {
+  width: 3px;
+}
+
+.waveform.panel-waveform-compact {
+  height: 22px;
+  min-width: 72px;
+  gap: 2px;
+}
+
+.waveform.panel-waveform-compact .waveform-bar {
+  width: 2px;
+}
+
+/* Slow rotation for ambient ring (GPU-friendly) */
+@keyframes ambientRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-ambient-spin {
+  animation: ambientRotate 22s linear infinite;
+}
+
+.animate-ambient-spin-reverse {
+  animation: ambientRotate 28s linear infinite reverse;
 }

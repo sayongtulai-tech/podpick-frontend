@@ -15,6 +15,34 @@ function formatTime(sec: number) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** Album art ambient glow — presentation only (RGB tuple for rgba shadows) */
+function nowPlayingGlowRgb(emotion: string | null | undefined): string {
+  const map: Record<string, string> = {
+    새벽감성: "139, 92, 246",
+    행복: "245, 158, 11",
+    설렘: "236, 72, 153",
+    힐링: "52, 211, 153",
+    집중: "56, 189, 248",
+    우울함: "100, 116, 139",
+    운동: "244, 63, 94",
+    드라이브: "56, 189, 248",
+    비오는날: "148, 163, 184",
+    신남: "163, 230, 53",
+    몽환적: "168, 85, 247",
+    그리움: "99, 102, 241",
+    여름: "14, 165, 233",
+    겨울: "125, 211, 252",
+    카페: "180, 83, 9",
+    여행: "45, 212, 191",
+    로맨틱: "217, 70, 239",
+    파티: "234, 179, 8",
+    명상: "129, 140, 248",
+    공부: "59, 130, 246",
+    수면: "99, 102, 241",
+  };
+  return map[emotion ?? ""] ?? "168, 85, 247";
+}
+
 function SidebarEmotionNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -136,7 +164,19 @@ function HeaderProfileMenu() {
   }, []);
 
   if (status === "loading") {
-    return <div className="h-9 w-24 animate-pulse rounded-full bg-white/10" aria-hidden />;
+    return (
+      <div
+        className="flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-2 backdrop-blur-sm md:min-h-0 md:py-1.5"
+        aria-busy="true"
+        aria-label="프로필 로딩 중"
+      >
+        <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-white/15" />
+        <div className="hidden min-w-[72px] space-y-1.5 sm:block">
+          <div className="h-2.5 w-16 animate-pulse rounded bg-white/15" />
+          <div className="h-2 w-12 animate-pulse rounded bg-white/10" />
+        </div>
+      </div>
+    );
   }
 
   if (status === "authenticated" && session?.user) {
@@ -271,8 +311,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="mt-6 border-t border-white/10 pt-4">
             {status === "loading" ? (
-              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
-                로그인 상태 확인 중...
+              <div className="space-y-2 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-3">
+                <div className="h-3 w-24 animate-pulse rounded bg-white/15" />
+                <div className="h-10 animate-pulse rounded-lg bg-white/10" />
+                <div className="h-8 animate-pulse rounded-lg bg-white/10" />
               </div>
             ) : session?.user ? (
               <div className="space-y-3">
@@ -312,16 +354,22 @@ function Shell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => signIn("google")}
-                className="btn-press flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-violet-200/35 bg-gradient-to-r from-violet-500/80 to-pink-500/80 px-3 text-xs font-bold text-white shadow-[0_10px_25px_rgba(168,85,247,0.35)] transition hover:from-violet-400 hover:to-pink-400 md:min-h-0 md:py-2"
-              >
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] font-extrabold text-white">
-                  G
-                </span>
-                <span>Google로 로그인</span>
-              </button>
+              <div className="space-y-3 rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-500/12 via-transparent to-pink-500/10 p-3">
+                <p className="text-xs font-semibold text-violet-100">PodPick을 시작해보세요</p>
+                <p className="text-[11px] leading-relaxed text-slate-300">
+                  로그인 없이도 감정 피드를 볼 수 있고, 로그인하면 나만의 플레이리스트를 저장하고 공유할 수 있어요.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => signIn("google")}
+                  className="btn-press flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-violet-200/35 bg-gradient-to-r from-violet-500/80 to-pink-500/80 px-3 text-xs font-bold text-white shadow-[0_10px_25px_rgba(168,85,247,0.35)] transition hover:from-violet-400 hover:to-pink-400 md:min-h-0 md:py-2"
+                >
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] font-extrabold text-white">
+                    G
+                  </span>
+                  <span>Google로 로그인</span>
+                </button>
+              </div>
             )}
           </div>
         </aside>
@@ -329,25 +377,122 @@ function Shell({ children }: { children: React.ReactNode }) {
         <section className="min-w-0 flex-1">{children}</section>
 
         <aside className="hidden w-80 shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4 xl:block">
-          <p className="text-xs font-semibold tracking-wide text-slate-400">현재 재생</p>
-          <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-[#16162a]">
-            <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="lg" />
-            <div className="p-4">
-              <p className="truncate text-sm font-semibold text-white">
-                {selectedPlaylist?.title ?? "재생 중인 곡이 없습니다"}
-              </p>
-              <p className="mt-1 text-xs text-slate-400">
-                {selectedPlaylist?.emotion ?? "플레이리스트를 선택해 주세요"}
-              </p>
-            </div>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold tracking-wide text-slate-400">현재 재생</p>
+            {selectedPlaylist ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.9)] ${isPlaying ? "animate-live-dot bg-emerald-400" : "bg-slate-600"}`}
+                />
+                {isPlaying ? "playing" : "idle"}
+              </span>
+            ) : null}
+          </div>
+          <div
+            className="relative mt-3 overflow-hidden rounded-2xl border border-white/10 bg-[#12121f]/95 shadow-[0_20px_56px_rgba(0,0,0,0.45)]"
+            style={{
+              boxShadow:
+                selectedPlaylist && isPlaying
+                  ? `0 0 0 1px rgba(255,255,255,0.06), 0 24px 70px rgba(${nowPlayingGlowRgb(emotionLabel)}, 0.28)`
+                  : undefined,
+            }}
+          >
+            {selectedPlaylist ? (
+              <>
+                <div
+                  className="pointer-events-none absolute -left-[45%] -top-[55%] h-[140%] w-[90%] animate-ambient-spin rounded-full opacity-70 blur-3xl transition-opacity duration-700"
+                  style={{
+                    background: `radial-gradient(circle at 50% 50%, rgba(${nowPlayingGlowRgb(emotionLabel)}, 0.42) 0%, transparent 62%)`,
+                  }}
+                />
+                <div
+                  className="pointer-events-none absolute -bottom-[40%] -right-[35%] h-[110%] w-[80%] animate-ambient-spin-reverse rounded-full opacity-50 blur-3xl"
+                  style={{
+                    background: `radial-gradient(circle at 50% 50%, rgba(${nowPlayingGlowRgb(emotionLabel)}, 0.28) 0%, transparent 58%)`,
+                  }}
+                />
+                <div className="relative">
+                  <div
+                    className="relative overflow-hidden rounded-t-2xl"
+                    style={{
+                      boxShadow: `0 0 48px rgba(${nowPlayingGlowRgb(emotionLabel)}, ${isPlaying ? 0.42 : 0.22})`,
+                    }}
+                  >
+                    <div
+                      className={`pointer-events-none absolute inset-0 z-10 rounded-t-2xl ring-1 ring-inset transition-all duration-500 ${
+                        isPlaying ? "ring-white/25 shadow-[inset_0_0_40px_rgba(255,255,255,0.06)]" : "ring-white/10"
+                      }`}
+                    />
+                    <PlaylistThumbnail musicUrl={selectedPlaylist.musicUrl} size="lg" />
+                    {isPlaying ? (
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/[0.04]" />
+                    ) : null}
+                  </div>
+                  <div className="relative border-t border-white/10 bg-gradient-to-b from-black/35 to-[#16162a] px-4 pb-4 pt-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-white">{selectedPlaylist.title}</p>
+                        <p className="mt-1 text-xs text-slate-400">{selectedPlaylist.emotion}</p>
+                      </div>
+                      <div
+                        className={`waveform panel-waveform-compact flex shrink-0 drop-shadow-[0_0_12px_rgba(168,85,247,0.35)] ${
+                          isPlaying ? "running" : "paused"
+                        }`}
+                        aria-hidden
+                      >
+                        {Array.from({ length: 10 }).map((_, i) => (
+                          <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div
+                      className={`pointer-events-none mt-4 flex h-9 items-end justify-center gap-1 opacity-90 transition-opacity duration-500 ${
+                        isPlaying ? "opacity-100" : "opacity-40"
+                      }`}
+                      aria-hidden
+                    >
+                      {Array.from({ length: 28 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className="w-0.5 rounded-full bg-gradient-to-t from-violet-600/50 via-fuchsia-400/70 to-pink-400/60"
+                          style={{
+                            height: `${18 + (i % 5) * 8}%`,
+                            animation: "waveformPulse 0.95s ease-in-out infinite",
+                            animationDelay: `${(i % 10) * 0.05}s`,
+                            animationPlayState: isPlaying ? "running" : "paused",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="relative p-5">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(124,58,237,0.2),transparent_55%),radial-gradient(ellipse_at_80%_80%,rgba(236,72,153,0.14),transparent_50%)]" />
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-dashed border-white/15 bg-gradient-to-br from-violet-500/15 via-[#1a1a2e] to-pink-500/12 shadow-inner">
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                  <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
+                    <span className="text-3xl opacity-90">🎧</span>
+                    <div className="h-1 w-16 rounded-full bg-white/10" />
+                  </div>
+                </div>
+                <p className="relative mt-4 text-sm font-semibold text-slate-100">재생 대기 중</p>
+                <p className="relative mt-1 text-xs leading-relaxed text-slate-400">
+                  감정 피드에서 플레이리스트를 선택하면 여기에 커버와 무드가 살아나요.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="mt-5 border-t border-white/10 pt-4">
             <p className="text-xs font-semibold tracking-wide text-slate-400">재생목록</p>
             <ul className="mt-2 max-h-64 space-y-0.5 overflow-y-auto pr-1 text-sm">
               {playlists.length === 0 ? (
-                <li className="rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-center text-xs text-slate-500">
-                  목록이 비어 있어요
+                <li className="rounded-lg border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.03] px-3 py-4 text-center">
+                  <p className="text-lg">🎧</p>
+                  <p className="mt-1 text-xs text-slate-300">재생목록을 준비 중이에요</p>
+                  <p className="mt-1 text-[11px] text-slate-500">잠시 후 감정 기반 추천이 표시됩니다.</p>
                 </li>
               ) : (
                 playlists.map((p) => {
@@ -425,14 +570,37 @@ function Shell({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="flex items-center gap-3 px-3 py-1.5">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-500/35 to-pink-500/35 blur-sm" aria-hidden />
-              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+              <div
+                className="absolute inset-0 rounded-xl blur-md transition-opacity duration-500"
+                style={{
+                  opacity: selectedPlaylist ? 0.85 : 0.35,
+                  background: selectedPlaylist
+                    ? `radial-gradient(circle at 50% 50%, rgba(${nowPlayingGlowRgb(emotionLabel)}, 0.55) 0%, transparent 68%)`
+                    : undefined,
+                }}
+                aria-hidden
+              />
+              <div className="relative rounded-xl shadow-[0_0_28px_rgba(0,0,0,0.35)]">
+                <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+              </div>
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
                 {selectedPlaylist?.title ?? "선택된 곡 없음"}
               </p>
-              <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                <p className="truncate text-xs text-slate-500">{emotionLabel ?? "PodPick"}</p>
+                {selectedPlaylist && isPlaying ? (
+                  <div
+                    className="waveform panel-waveform-compact flex shrink-0 opacity-95 drop-shadow-[0_0_8px_rgba(168,85,247,0.35)] running"
+                    aria-hidden
+                  >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
               {durationSec > 0 ? (
                 <p className="mt-0.5 truncate text-[10px] tabular-nums text-slate-500">
                   {formatTime(currentTimeSec)} / {formatTime(durationSec)}
@@ -468,8 +636,19 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-500/30 to-pink-500/30 blur-sm" aria-hidden />
-              <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+              <div
+                className="absolute inset-0 rounded-xl blur-md transition-opacity duration-500"
+                style={{
+                  opacity: selectedPlaylist ? 0.75 : 0.3,
+                  background: selectedPlaylist
+                    ? `radial-gradient(circle at 50% 50%, rgba(${nowPlayingGlowRgb(emotionLabel)}, 0.5) 0%, transparent 68%)`
+                    : undefined,
+                }}
+                aria-hidden
+              />
+              <div className="relative rounded-xl shadow-[0_0_24px_rgba(0,0,0,0.35)]">
+                <PlaylistThumbnail musicUrl={selectedPlaylist?.musicUrl} size="sm" />
+              </div>
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-100">
@@ -478,8 +657,11 @@ function Shell({ children }: { children: React.ReactNode }) {
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <p className="truncate text-xs text-slate-400">{emotionLabel ?? "PodPick"}</p>
                 {isPlaying ? (
-                  <div className="waveform waveform-compact player-waveform waveform running flex shrink-0 opacity-95 drop-shadow-[0_0_6px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out" aria-hidden>
-                    {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    className="waveform player-waveform panel-waveform flex shrink-0 opacity-95 drop-shadow-[0_0_8px_rgba(168,85,247,0.45)] transition-all duration-300 ease-out running"
+                    aria-hidden
+                  >
+                    {Array.from({ length: 10 }).map((_, i) => (
                       <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.06}s` }} />
                     ))}
                   </div>

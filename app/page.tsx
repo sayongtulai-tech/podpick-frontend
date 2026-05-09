@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { usePlayer } from "@/components/player/PlayerProvider";
 import { Playlist } from "@/types/playlist";
-import { useSession } from "next-auth/react";
 import {
   EMOTIONS,
   EMOTION_EMOJI,
@@ -124,7 +124,7 @@ function creatorLabel(item: Playlist) {
 }
 
 function HomePageContent() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [shareTarget, setShareTarget] = useState<Playlist | null>(null);
   const [sharePanelActive, setSharePanelActive] = useState(false);
   const [shareToast, setShareToast] = useState<string | null>(null);
@@ -175,20 +175,44 @@ function HomePageContent() {
   const feedInsights = useMemo(() => {
     const emotionSaveMap = new Map<string, number>();
     const emotionLikeMap = new Map<string, number>();
+    const emotionEngagementMap = new Map<string, number>();
     for (const p of playlists) {
-      emotionSaveMap.set(p.emotion, (emotionSaveMap.get(p.emotion) ?? 0) + (p.savedCount ?? 0));
-      emotionLikeMap.set(p.emotion, (emotionLikeMap.get(p.emotion) ?? 0) + (p.likeCount ?? 0));
+      const saves = p.savedCount ?? 0;
+      const likes = p.likeCount ?? 0;
+      emotionSaveMap.set(p.emotion, (emotionSaveMap.get(p.emotion) ?? 0) + saves);
+      emotionLikeMap.set(p.emotion, (emotionLikeMap.get(p.emotion) ?? 0) + likes);
+      emotionEngagementMap.set(
+        p.emotion,
+        (emotionEngagementMap.get(p.emotion) ?? 0) + likes + saves * 2,
+      );
     }
     const mostSavedEmotion =
       [...emotionSaveMap.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "새벽감성";
     const hottestMood =
       [...emotionLikeMap.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "설렘";
+    const topStreamingEmotion =
+      [...emotionEngagementMap.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? hottestMood;
+    const engagementPulse = [...emotionEngagementMap.values()].reduce((a, b) => a + b, 0);
+    const rankedMoodStrip =
+      emotionEngagementMap.size > 0
+        ? [...emotionEngagementMap.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([e]) => e)
+        : EMOTION_ONLY.slice(0, 10);
     const dawnPick =
       playlists.find((p) => p.emotion === "새벽감성") ??
       playlists.find((p) => p.emotion === "비오는날") ??
       playlists[0] ??
       null;
-    return { mostSavedEmotion, hottestMood, dawnPick };
+    return {
+      mostSavedEmotion,
+      hottestMood,
+      topStreamingEmotion,
+      engagementPulse,
+      rankedMoodStrip,
+      dawnPick,
+    };
   }, [playlists]);
 
   async function copyShareLink(item: Playlist) {
@@ -241,68 +265,190 @@ function HomePageContent() {
 
   return (
     <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#121226]/90 p-5 shadow-[0_20px_60px_rgba(2,6,23,0.45)] md:p-7">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-violet-500/30 blur-3xl" />
-        <div className="pointer-events-none absolute -right-16 top-8 h-52 w-52 rounded-full bg-pink-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-cyan-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(140deg,rgba(168,85,247,0.08)_0%,rgba(236,72,153,0.05)_45%,rgba(56,189,248,0.04)_100%)]" />
+      {sessionStatus === "unauthenticated" ? (
+        <section className="md:hidden rounded-2xl border border-violet-300/25 bg-gradient-to-br from-violet-500/18 via-[#151528]/90 to-pink-500/12 p-4 shadow-[0_16px_48px_rgba(76,29,149,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-200/90">감정 기반 음악 발견</p>
+          <p className="mt-1 text-sm font-semibold text-white">지금 무드에 맞는 소리를 탐색해 보세요</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-300">
+            로그인 없이 아래 피드를 둘러보고, 저장·공유는 Google 로그인 후 이용할 수 있어요.
+          </p>
+          <button
+            type="button"
+            onClick={() => signIn("google")}
+            className="btn-press mt-3 w-full rounded-xl border border-violet-200/40 bg-gradient-to-r from-violet-500/85 to-pink-500/80 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(168,85,247,0.35)]"
+          >
+            Google로 시작하기
+          </button>
+        </section>
+      ) : null}
 
-        <div className="relative grid gap-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-end">
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#0c0c18]/95 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.55)] md:p-7">
+        {/* Ambient mesh + orbs */}
+        <div
+          className="pointer-events-none absolute inset-0 animate-hero-shimmer opacity-90"
+          style={{
+            backgroundImage:
+              "linear-gradient(125deg, rgba(124,58,237,0.22) 0%, rgba(236,72,153,0.12) 38%, rgba(56,189,248,0.1) 72%, rgba(124,58,237,0.08) 100%)",
+            backgroundSize: "400% 400%",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 animate-hero-shimmer opacity-40"
+          style={{
+            backgroundImage:
+              "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.07) 45%, transparent 88%)",
+            backgroundSize: "220% 100%",
+          }}
+        />
+        <div className="pointer-events-none absolute -left-24 -top-28 h-72 w-72 animate-hero-breathe rounded-full bg-violet-500/35 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-4 h-60 w-60 animate-hero-drift-slow rounded-full bg-fuchsia-500/25 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-[-20%] left-[18%] h-52 w-52 animate-hero-drift-medium rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute right-[12%] top-1/3 h-44 w-44 animate-hero-breathe rounded-full bg-indigo-500/20 blur-3xl [animation-delay:2s]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(168,85,247,0.07)_0%,transparent_42%,rgba(236,72,153,0.06)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.06)_0%,transparent_55%)]" />
+        {/* Fine grid — cinematic density */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] opacity-[0.35]" />
+
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end">
           <div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/35 bg-violet-500/15 px-3 py-1 text-[11px] font-medium text-violet-100">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-200" />
-                live mood feed
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100/95 shadow-[0_0_24px_rgba(52,211,153,0.18)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
+                </span>
+                live mood
               </span>
-              <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                {EMOTION_EMOJI[feedInsights.hottestMood] ?? "✨"} 지금 인기: {feedInsights.hottestMood}
+              <span className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] text-slate-300 backdrop-blur-sm">
+                피드 무드 에너지{" "}
+                <span className="font-semibold tabular-nums text-white">
+                  {feedInsights.engagementPulse.toLocaleString()}
+                </span>
+              </span>
+              <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[11px] text-slate-400">
+                리스너들이 같은 무드를 탐색 중 · 실시간 피드 동기화
               </span>
             </div>
 
-            <h1 className="text-2xl font-black leading-tight text-white md:text-[2.2rem] md:leading-[1.15]">
+            <div
+              className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 shadow-[0_16px_48px_rgba(0,0,0,0.35)] ${cardAccentClass(feedInsights.topStreamingEmotion)}`}
+            >
+              <div className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">now streaming #1</p>
+              <p className="mt-2 flex flex-wrap items-end gap-2">
+                <span className="text-3xl leading-none md:text-4xl">
+                  {EMOTION_EMOJI[feedInsights.topStreamingEmotion] ?? "🎵"}
+                </span>
+                <span className="text-lg font-bold text-white md:text-xl">
+                  지금 가장 많이 재생되는 감정
+                </span>
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white drop-shadow-sm">
+                {feedInsights.topStreamingEmotion}
+              </p>
+              <p className="mt-2 max-w-lg text-xs leading-relaxed text-white/85">
+                좋아요·저장 반응을 합산한 무드 스트림 1위예요. 아래 피드에서 같은 감정의 플레이리스트를 바로 들어보세요.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] font-medium text-white/90">
+                  {EMOTION_EMOJI[feedInsights.hottestMood] ?? "✨"} 반응 속도 1위 · {feedInsights.hottestMood}
+                </span>
+                <span className="rounded-full border border-white/20 bg-black/15 px-3 py-1 text-[11px] text-white/80">
+                  {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "📌"} 저장 트렌드 · {feedInsights.mostSavedEmotion}
+                </span>
+              </div>
+            </div>
+
+            <h1 className="mt-5 text-2xl font-black leading-tight tracking-tight text-white md:text-[2.35rem] md:leading-[1.12]">
               지금 감정을 듣는 가장
               <br />
-              <span className="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(167,139,250,0.35)]">
                 몰입적인 방법, PodPick
               </span>
             </h1>
 
-            <p className="mt-3 max-w-xl text-sm text-slate-300 md:text-base">
-              감정 기반 추천과 소셜 피드를 한 번에. 지금 분위기에 맞는 플레이리스트를 발견하고, 너의 무드를 바로 공유해보세요.
+            <p className="mt-3 max-w-xl text-sm text-slate-300 md:text-base md:leading-relaxed">
+              감정 기반 추천과 소셜 피드를 한 화면에. 무드에 맞는 플레이리스트를 발견하고, 바로 재생해 보세요.
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              <span className="rounded-full border border-violet-300/40 bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-100 shadow-[0_6px_18px_rgba(124,58,237,0.25)]">
-                {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "🎵"} 오늘의 감정: {feedInsights.mostSavedEmotion}
+            {/* Mood ticker — discover-page density */}
+            <div className="relative mt-5 overflow-hidden rounded-full border border-white/10 bg-black/30 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[#0a0a14] to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[#0a0a14] to-transparent" />
+              <div className="animate-marquee flex w-max gap-8 whitespace-nowrap pr-8">
+                {[...feedInsights.rankedMoodStrip, ...feedInsights.rankedMoodStrip].map((e, i) => (
+                  <span
+                    key={`${e}-${i}`}
+                    className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-300"
+                  >
+                    <span className="text-sm">{EMOTION_EMOJI[e] ?? "🎵"}</span>
+                    <span className="text-slate-100">{e}</span>
+                    <span className="text-slate-600">·</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-violet-300/40 bg-violet-500/15 px-3 py-1.5 text-xs font-medium text-violet-100 shadow-[0_6px_18px_rgba(124,58,237,0.25)]">
+                {EMOTION_EMOJI[feedInsights.mostSavedEmotion] ?? "🎵"} 오늘 많이 담긴 감정 · {feedInsights.mostSavedEmotion}
               </span>
-              <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-slate-300">
-                추천 무드 카피: {emotionCopy(feedInsights.hottestMood)}
+              <span className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs text-slate-300">
+                무드 노트 · {emotionCopy(feedInsights.hottestMood)}
               </span>
             </div>
           </div>
 
           <div className="relative">
-            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/10 to-transparent p-4 backdrop-blur-sm">
-              <p className="text-[11px] uppercase tracking-wide text-slate-300">오늘의 spotlight</p>
-              <p className="mt-2 truncate text-lg font-semibold text-white">
-                {feedInsights.dawnPick?.title ?? "지금 인기 무드 큐레이션"}
-              </p>
-              <p className="mt-1 text-xs text-slate-300">
-                {feedInsights.dawnPick
-                  ? `${EMOTION_EMOJI[feedInsights.dawnPick.emotion] ?? "🎵"} ${feedInsights.dawnPick.emotion} · ${creatorLabel(feedInsights.dawnPick)}`
-                  : "새로운 감정 플레이리스트가 올라오고 있어요"}
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-xl border border-pink-300/30 bg-pink-500/15 px-3 py-2 text-pink-100">
-                  ❤️ hottest mood
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.12] via-white/[0.04] to-transparent p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">spotlight</p>
+                  <p className="mt-2 truncate text-lg font-bold text-white">
+                    {feedInsights.dawnPick?.title ?? "지금 인기 무드 큐레이션"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-300">
+                    {feedInsights.dawnPick
+                      ? `${EMOTION_EMOJI[feedInsights.dawnPick.emotion] ?? "🎵"} ${feedInsights.dawnPick.emotion} · ${creatorLabel(feedInsights.dawnPick)}`
+                      : "새로운 감정 플레이리스트가 올라오고 있어요"}
+                  </p>
                 </div>
-                <div className="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-3 py-2 text-emerald-100">
-                  📌 saved trend
+                <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-white/15 bg-black/30 shadow-inner">
+                  <div className="waveform waveform-compact running flex opacity-90" aria-hidden>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <span key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.07}s` }} />
+                    ))}
+                  </div>
+                  <span className="mt-1 text-[9px] font-medium uppercase tracking-wide text-slate-500">live</span>
                 </div>
               </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-xl border border-pink-400/25 bg-gradient-to-br from-pink-500/20 to-transparent px-3 py-2.5 text-pink-100 shadow-[0_8px_24px_rgba(236,72,153,0.12)]">
+                  <p className="text-[10px] uppercase tracking-wide text-pink-200/90">hottest</p>
+                  <p className="mt-1 font-semibold">{feedInsights.hottestMood}</p>
+                </div>
+                <div className="rounded-xl border border-emerald-400/25 bg-gradient-to-br from-emerald-500/18 to-transparent px-3 py-2.5 text-emerald-100 shadow-[0_8px_24px_rgba(52,211,153,0.1)]">
+                  <p className="text-[10px] uppercase tracking-wide text-emerald-200/90">saved</p>
+                  <p className="mt-1 font-semibold">{feedInsights.mostSavedEmotion}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-1.5 opacity-90">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="h-7 w-0.5 rounded-full bg-gradient-to-t from-violet-600/30 via-fuchsia-400/50 to-pink-400/40"
+                    style={{
+                      animation: "waveformPulse 1.05s ease-in-out infinite",
+                      animationDelay: `${(i % 8) * 0.08}s`,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="pointer-events-none absolute -bottom-6 right-4 h-16 w-16 animate-pulse rounded-full bg-fuchsia-400/20 blur-2xl" />
+            <div className="pointer-events-none absolute -bottom-8 right-2 h-24 w-24 animate-pulse rounded-full bg-fuchsia-400/25 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-4 left-8 h-14 w-14 rounded-full bg-violet-500/20 blur-2xl" />
           </div>
         </div>
       </section>
@@ -344,7 +490,21 @@ function HomePageContent() {
       <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
         <h2 className="text-lg font-bold text-white">인기 플레이리스트</h2>
         {loading ? (
-          <p className="mt-3 text-sm text-slate-400">불러오는 중...</p>
+          <div className="mt-4 rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 via-transparent to-pink-500/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 animate-live-dot rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]" />
+              <p className="text-xs uppercase tracking-wide text-violet-100/90">syncing mood feed</p>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="aspect-[16/9] skeleton-premium rounded-lg" />
+                  <div className="mt-3 h-3 w-2/3 skeleton-premium rounded" />
+                  <div className="mt-2 h-2.5 w-1/2 skeleton-premium rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
         ) : error ? (
           <p className="mt-3 text-sm text-rose-300">{error}</p>
         ) : topLiked.length === 0 ? (
@@ -763,7 +923,28 @@ function HomePageContent() {
 
 export default function HomePage() {
   return (
-    <Suspense fallback={<div className="rounded-2xl border border-white/10 bg-white/[0.04] p-10 text-center text-slate-400">불러오는 중...</div>}>
+    <Suspense
+      fallback={
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/12 via-[#0d0d18] to-pink-500/10 p-8">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_14px_rgba(52,211,153,0.55)]" />
+              <p className="text-xs uppercase tracking-[0.2em] text-violet-100/90">preparing your mood space</p>
+            </div>
+            <p className="text-[11px] text-slate-500">프리미엄 무드 레이아웃을 불러오는 중이에요.</p>
+          </div>
+          <div className="mx-auto mt-6 grid max-w-3xl gap-3 md:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="h-24 skeleton-premium rounded-lg" />
+                <div className="mt-3 h-3 skeleton-premium rounded" />
+                <div className="mt-2 h-2.5 w-2/3 skeleton-premium rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+    >
       <HomePageContent />
     </Suspense>
   );
